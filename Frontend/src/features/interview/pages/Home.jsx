@@ -115,19 +115,29 @@ function ResumeDropzone({ resumeInputRef }) {
     )
 }
 
+const COMPANIES = [
+    { id: 'default', label: '🏢 Any Company' },
+    { id: 'google', label: '🔍 Google' },
+    { id: 'amazon', label: '📦 Amazon' },
+    { id: 'microsoft', label: '🪟 Microsoft' },
+    { id: 'meta', label: '👥 Meta' },
+    { id: 'startup', label: '🚀 Startup' },
+]
+
 /* ── Main Home page ──────────────────────────────────────────── */
 const Home = () => {
 
     const { loading, generateReport, reports } = useInterview()
     const [ jobDescription, setJobDescription ] = useState("")
     const [ selfDescription, setSelfDescription ] = useState("")
+    const [ companyPreset, setCompanyPreset ] = useState("default")
     const resumeInputRef = useRef()
 
     const navigate = useNavigate()
 
     const handleGenerateReport = async () => {
         const resumeFile = resumeInputRef.current.files[0]
-        const data = await generateReport({ jobDescription, selfDescription, resumeFile })
+        const data = await generateReport({ jobDescription, selfDescription, resumeFile, companyPreset })
         navigate(`/interview/${data._id}`)
     }
 
@@ -142,11 +152,35 @@ const Home = () => {
     return (
         <div className='home-page'>
 
+            {/* Top Nav */}
+            <div className='home-topnav'>
+                <span className='home-topnav__brand'>⚡ InterviewAI</span>
+                <button className='home-topnav__dash' onClick={() => navigate('/dashboard')}>
+                    📊 Dashboard
+                </button>
+            </div>
+
             {/* Page Header */}
             <header className='page-header'>
                 <h1>Create Your Custom <span className='highlight'>Interview Plan</span></h1>
                 <p>Let our AI analyze the job requirements and your unique profile to build a winning strategy.</p>
             </header>
+
+            {/* Company Preset */}
+            <div className='company-selector'>
+                <span className='company-selector__label'>Target Company:</span>
+                <div className='company-pills'>
+                    {COMPANIES.map(c => (
+                        <button
+                            key={c.id}
+                            className={`company-pill${companyPreset === c.id ? ' company-pill--active' : ''}`}
+                            onClick={() => setCompanyPreset(c.id)}
+                        >
+                            {c.label}
+                        </button>
+                    ))}
+                </div>
+            </div>
 
             {/* Main Card */}
             <div className='interview-card'>

@@ -1,0 +1,192 @@
+$bg-page:      #0d1117;
+$bg-card:      #161b22;
+$bg-input:     #1e2535;
+$border:       #2a3348;
+$text-primary: #e6edf3;
+$text-muted:   #7d8590;
+$accent:       #ff2d78;
+$green:        #3fb950;
+$yellow:       #e3b341;
+$red:          #f85149;
+$font:         system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+.shared-page {
+    min-height: 100vh;
+    background: $bg-page;
+    color: $text-primary;
+    font-family: $font;
+}
+
+.shared-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 2rem;
+    border-bottom: 1px solid $border;
+    background: $bg-card;
+
+    &__brand { font-weight: 700; font-size: 1rem; color: $accent; }
+    &__badge {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.6rem;
+        background: rgba($accent, 0.1);
+        color: $accent;
+        border: 1px solid rgba($accent, 0.25);
+        border-radius: 2rem;
+    }
+}
+
+.shared-body {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.shared-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+
+    h1 { font-size: 1.75rem; font-weight: 700; margin: 0; }
+}
+
+.shared-score {
+    display: flex;
+    align-items: baseline;
+    gap: 0.15rem;
+    padding: 0.6rem 1rem;
+    border-radius: 0.6rem;
+    font-weight: 700;
+
+    &__val { font-size: 2rem; }
+    &__pct { font-size: 0.9rem; }
+
+    &.score--high { background: rgba($green, 0.12); color: $green; border: 2px solid rgba($green, 0.3); }
+    &.score--mid  { background: rgba($yellow, 0.12); color: $yellow; border: 2px solid rgba($yellow, 0.3); }
+    &.score--low  { background: rgba($red, 0.12); color: $red; border: 2px solid rgba($red, 0.3); }
+}
+
+.shared-sections { display: flex; flex-direction: column; gap: 1.5rem; }
+
+.shared-section {
+    background: $bg-card;
+    border: 1px solid $border;
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+
+    h2 {
+        font-size: 1rem;
+        font-weight: 600;
+        margin: 0 0 1rem;
+        padding-bottom: 0.6rem;
+        border-bottom: 1px solid $border;
+    }
+}
+
+.shared-gaps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.skill-tag {
+    font-size: 0.78rem;
+    font-weight: 500;
+    padding: 0.25rem 0.65rem;
+    border-radius: 2rem;
+    border: 1px solid;
+
+    &--high   { background: rgba($red, 0.12);    color: $red;    border-color: rgba($red, 0.3); }
+    &--medium { background: rgba($yellow, 0.12); color: $yellow; border-color: rgba($yellow, 0.3); }
+    &--low    { background: rgba($green, 0.12);  color: $green;  border-color: rgba($green, 0.3); }
+}
+
+.shared-qlist {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.shared-qitem {
+    font-size: 0.875rem;
+    padding: 0.6rem 0.75rem;
+    background: $bg-input;
+    border-radius: 0.4rem;
+    line-height: 1.5;
+    color: $text-primary;
+    strong { color: $accent; margin-right: 0.25rem; }
+}
+
+.shared-roadmap { display: flex; flex-direction: column; gap: 0.75rem; }
+
+.shared-day {
+    padding: 0.75rem;
+    background: $bg-input;
+    border-radius: 0.5rem;
+
+    &__header {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        margin-bottom: 0.5rem;
+        strong { font-size: 0.875rem; }
+    }
+
+    &__badge {
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 0.15rem 0.5rem;
+        background: rgba($accent, 0.15);
+        color: $accent;
+        border-radius: 0.3rem;
+        white-space: nowrap;
+    }
+
+    ul {
+        margin: 0;
+        padding-left: 1.25rem;
+        li { font-size: 0.82rem; color: $text-muted; margin-bottom: 0.2rem; line-height: 1.4; }
+    }
+}
+
+.shared-footer {
+    text-align: center;
+    padding: 1.5rem 0;
+    border-top: 1px solid $border;
+    font-size: 0.8rem;
+    color: $text-muted;
+    strong { color: $accent; }
+}
+
+.shared-error {
+    min-height: 100vh;
+    background: $bg-page;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: $font;
+
+    &__box {
+        background: $bg-card;
+        border: 1px solid $border;
+        border-radius: 1rem;
+        padding: 3rem;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+        max-width: 400px;
+
+        span { font-size: 3rem; }
+        h2 { color: $text-primary; margin: 0; }
+        p { color: $text-muted; margin: 0; font-size: 0.9rem; }
+    }
+}

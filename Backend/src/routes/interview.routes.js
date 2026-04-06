@@ -5,38 +5,41 @@ const upload = require("../middlewares/file.middleware")
 
 const interviewRouter = express.Router()
 
-
-
-/**
- * @route POST /api/interview/
- * @description generate new interview report on the basis of user self description,resume pdf and job description.
- * @access private
- */
+// ── Core ──────────────────────────────────────────────────────────────────────
 interviewRouter.post("/", authMiddleware.authUser, upload.single("resume"), interviewController.generateInterViewReportController)
-
-/**
- * @route GET /api/interview/report/:interviewId
- * @description get interview report by interviewId.
- * @access private
- */
 interviewRouter.get("/report/:interviewId", authMiddleware.authUser, interviewController.getInterviewReportByIdController)
-
-
-/**
- * @route GET /api/interview/
- * @description get all interview reports of logged in user.
- * @access private
- */
 interviewRouter.get("/", authMiddleware.authUser, interviewController.getAllInterviewReportsController)
-
-
-/**
- * @route GET /api/interview/resume/pdf
- * @description generate resume pdf on the basis of user self description, resume content and job description.
- * @access private
- */
 interviewRouter.post("/resume/pdf/:interviewReportId", authMiddleware.authUser, interviewController.generateResumePdfController)
 
+// ── Answer Grader ─────────────────────────────────────────────────────────────
+interviewRouter.post("/grade-answer", authMiddleware.authUser, interviewController.gradeAnswerController)
 
+// ── Mock Interview ────────────────────────────────────────────────────────────
+interviewRouter.post("/mock/:interviewId/evaluate", authMiddleware.authUser, interviewController.evaluateMockAnswerController)
+
+// ── Analytics ─────────────────────────────────────────────────────────────────
+interviewRouter.get("/analytics/me", authMiddleware.authUser, interviewController.getAnalyticsController)
+
+// ── Share ─────────────────────────────────────────────────────────────────────
+interviewRouter.post("/share/:interviewId", authMiddleware.authUser, interviewController.generateShareTokenController)
+interviewRouter.get("/share/view/:token", interviewController.getSharedReportController)
+
+// ── Tier 1: ATS Score ─────────────────────────────────────────────────────────
+interviewRouter.post("/ats-score", authMiddleware.authUser, interviewController.analyzeATSController)
+
+// ── Tier 2: Salary Coach ──────────────────────────────────────────────────────
+interviewRouter.post("/salary-coach", authMiddleware.authUser, interviewController.salaryCoachController)
+
+// ── Tier 2: Leaderboard (public) ──────────────────────────────────────────────
+interviewRouter.get("/leaderboard", interviewController.getLeaderboardController)
+
+// ── Tier 2: Notes ─────────────────────────────────────────────────────────────
+interviewRouter.put("/report/:interviewId/notes", authMiddleware.authUser, interviewController.saveNotesController)
+
+// ── Tier 1: Roadmap Progress ──────────────────────────────────────────────────
+interviewRouter.put("/report/:interviewId/roadmap-progress", authMiddleware.authUser, interviewController.updateRoadmapProgressController)
+
+// ── Tier 2: Streak ────────────────────────────────────────────────────────────
+interviewRouter.get("/streak", authMiddleware.authUser, interviewController.getStreakController)
 
 module.exports = interviewRouter

@@ -1,0 +1,615 @@
+// ── Variables ─────────────────────────────────────────────────────────────────
+$bg-page:      #0d1117;
+$bg-card:      #161b22;
+$bg-input:     #1e2535;
+$border:       #2a3348;
+$text-primary: #e6edf3;
+$text-muted:   #7d8590;
+$accent:       #ff2d78;
+$green:        #3fb950;
+$yellow:       #e3b341;
+$red:          #f85149;
+$font:         system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+// ── Page ──────────────────────────────────────────────────────────────────────
+.mock-page {
+    min-height: 100vh;
+    background: $bg-page;
+    color: $text-primary;
+    font-family: $font;
+    display: flex;
+    flex-direction: column;
+}
+
+// ── Header ────────────────────────────────────────────────────────────────────
+.mock-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 2rem;
+    border-bottom: 1px solid $border;
+    background: $bg-card;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+
+    h1 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 0;
+        span { color: $text-muted; font-weight: 400; }
+    }
+
+    &__info {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+}
+
+.mock-back {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: none;
+    border: 1px solid $border;
+    color: $text-muted;
+    font-size: 0.85rem;
+    padding: 0.4rem 0.75rem;
+    border-radius: 0.4rem;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+    font-family: $font;
+    &:hover { color: $text-primary; border-color: $text-muted; }
+}
+
+.mock-progress {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.85rem;
+    color: $text-muted;
+    &__avg strong { color: $accent; }
+}
+
+// ── Body ──────────────────────────────────────────────────────────────────────
+.mock-body {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+// ── Setup Screen ──────────────────────────────────────────────────────────────
+.mock-setup {
+    max-width: 500px;
+    width: 100%;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.25rem;
+    background: $bg-card;
+    border: 1px solid $border;
+    border-radius: 1rem;
+    padding: 2.5rem 2rem;
+
+    &__icon { font-size: 3rem; }
+    &__badge {
+        width: 64px; height: 64px;
+        border-radius: 50%;
+        background: rgba($accent, 0.1);
+        border: 1px solid rgba($accent, 0.25);
+        display: flex; align-items: center; justify-content: center;
+        svg { stroke: $accent; }
+    }
+
+    h2 { font-size: 1.5rem; font-weight: 700; margin: 0; }
+
+    p {
+        color: $text-muted;
+        font-size: 0.9rem;
+        line-height: 1.6;
+        margin: 0;
+        max-width: 380px;
+    }
+
+    &__note { font-size: 0.8rem; color: $text-muted; margin: 0; }
+}
+
+// ── Setup Options ─────────────────────────────────────────────────────────────
+.mock-options {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    text-align: left;
+}
+
+.mock-option-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    > label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: $text-muted;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        cursor: pointer;
+
+        input[type='checkbox'] {
+            accent-color: $accent;
+            width: 14px; height: 14px;
+        }
+    }
+}
+
+.timer-select {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+}
+
+.timer-opt {
+    padding: 0.3rem 0.75rem;
+    border-radius: 0.3rem;
+    border: 1px solid $border;
+    background: $bg-input;
+    color: $text-muted;
+    font-size: 0.8rem;
+    cursor: pointer;
+    font-family: $font;
+    transition: all 0.15s;
+
+    &.active {
+        border-color: $accent;
+        color: $accent;
+        background: rgba($accent, 0.1);
+    }
+}
+
+// ── Timer Ring ────────────────────────────────────────────────────────────────
+.timer-ring {
+    position: relative;
+    width: 60px;
+    height: 60px;
+    flex-shrink: 0;
+
+    svg { position: absolute; top: 0; left: 0; }
+
+    &__time {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.72rem;
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+    }
+}
+
+.timer-expired {
+    background: rgba($red, 0.1);
+    border: 1px solid rgba($red, 0.3);
+    color: $red;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.4rem 0.75rem;
+    border-radius: 0.3rem;
+    text-align: center;
+}
+
+// ── Mic Button ────────────────────────────────────────────────────────────────
+.mic-btn {
+    position: relative;
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    border: 1px solid $border;
+    background: $bg-input;
+    color: $text-muted;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+
+    &:hover { border-color: $accent; color: $accent; }
+
+    &--active {
+        border-color: $red;
+        color: $red;
+        background: rgba($red, 0.1);
+    }
+}
+
+.mic-pulse {
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    border: 2px solid rgba($red, 0.5);
+    animation: pulse-ring 1.2s ease infinite;
+}
+
+@keyframes pulse-ring {
+    0%   { transform: scale(1);   opacity: 0.8; }
+    100% { transform: scale(1.5); opacity: 0; }
+}
+
+// ── Voice Wave ────────────────────────────────────────────────────────────────
+.mock-textarea-wrap {
+    position: relative;
+}
+
+.voice-wave {
+    position: absolute;
+    bottom: 8px;
+    right: 12px;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    height: 16px;
+
+    span {
+        display: block;
+        width: 3px;
+        border-radius: 3px;
+        background: $red;
+        animation: wave-bar 0.9s ease-in-out infinite;
+
+        &:nth-child(1) { height: 4px;  animation-delay: 0s; }
+        &:nth-child(2) { height: 10px; animation-delay: 0.1s; }
+        &:nth-child(3) { height: 16px; animation-delay: 0.2s; }
+        &:nth-child(4) { height: 10px; animation-delay: 0.3s; }
+        &:nth-child(5) { height: 4px;  animation-delay: 0.4s; }
+    }
+}
+
+@keyframes wave-bar {
+    0%, 100% { transform: scaleY(0.5); }
+    50%       { transform: scaleY(1); }
+}
+
+.mock-input-left {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.mock-type-selector {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.type-btn {
+    padding: 0.5rem 1.25rem;
+    border-radius: 2rem;
+    border: 1px solid $border;
+    background: $bg-input;
+    color: $text-muted;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: $font;
+
+    &--active {
+        border-color: $accent;
+        color: $accent;
+        background: rgba($accent, 0.1);
+    }
+}
+
+.mock-start-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.75rem 2rem;
+    background: linear-gradient(135deg, $accent, darken($accent, 10%));
+    color: #fff;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    font-family: $font;
+    &:hover { opacity: 0.9; }
+    &:active { transform: scale(0.98); }
+}
+
+// ── Interview Screen ──────────────────────────────────────────────────────────
+.mock-interview {
+    max-width: 720px;
+    width: 100%;
+}
+
+.mock-chat {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.chat-exchange {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.chat-bubble {
+    padding: 1rem 1.25rem;
+    border-radius: 0.75rem;
+    max-width: 85%;
+    font-size: 0.9rem;
+    line-height: 1.6;
+
+    .bubble-label {
+        display: block;
+        font-size: 0.7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.4rem;
+        opacity: 0.7;
+    }
+
+    &--ai {
+        background: $bg-card;
+        border: 1px solid $border;
+        border-radius: 0.75rem 0.75rem 0.75rem 0;
+        align-self: flex-start;
+        .bubble-label { color: $accent; }
+    }
+
+    &--user {
+        background: rgba($accent, 0.1);
+        border: 1px solid rgba($accent, 0.2);
+        border-radius: 0.75rem 0.75rem 0 0.75rem;
+        align-self: flex-end;
+        .bubble-label { color: $accent; }
+    }
+}
+
+.chat-eval--past {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    align-self: flex-end;
+}
+
+.eval-badge, .verdict-tag {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.2rem 0.6rem;
+    border-radius: 2rem;
+    text-transform: capitalize;
+
+    &.excellent   { background: rgba($green, 0.15);   color: $green; }
+    &.good        { background: rgba($yellow, 0.15);  color: $yellow; }
+    &.needs_work  { background: rgba(#ffa657, 0.15); color: #ffa657; }
+    &.poor        { background: rgba($red, 0.15);    color: $red; }
+}
+
+.eval-score { font-size: 0.8rem; color: $text-muted; }
+
+// ── Input Area ────────────────────────────────────────────────────────────────
+.mock-input-area {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.mock-textarea {
+    width: 100%;
+    background: $bg-card;
+    border: 1px solid $border;
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    color: $text-primary;
+    font-family: $font;
+    font-size: 0.9rem;
+    resize: vertical;
+    line-height: 1.5;
+    outline: none;
+    transition: border-color 0.2s;
+    box-sizing: border-box;
+
+    &::placeholder { color: $text-muted; }
+    &:focus { border-color: $accent; }
+}
+
+.mock-input-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.mock-hint { font-size: 0.75rem; color: $text-muted; }
+
+.mock-submit-btn {
+    padding: 0.6rem 1.5rem;
+    background: $accent;
+    color: #fff;
+    border: none;
+    border-radius: 0.4rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: $font;
+    transition: opacity 0.2s;
+    &:hover:not(:disabled) { opacity: 0.85; }
+    &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+// ── Evaluation Card ───────────────────────────────────────────────────────────
+.eval-card {
+    background: $bg-card;
+    border: 1px solid $border;
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    &__header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        h3 { margin: 0 0 0.4rem; font-size: 1rem; }
+    }
+}
+
+.score-ring {
+    display: flex;
+    align-items: baseline;
+    gap: 0.15rem;
+    padding: 0.5rem 0.75rem;
+    border: 2px solid var(--score-color, $accent);
+    border-radius: 0.5rem;
+    background: rgba(255,255,255,0.03);
+
+    &__val { font-size: 1.5rem; font-weight: 700; color: var(--score-color, $accent); }
+    &__max { font-size: 0.75rem; color: $text-muted; }
+}
+
+.eval-feedback {
+    font-size: 0.9rem;
+    color: $text-primary;
+    line-height: 1.6;
+    margin: 0;
+    background: rgba(255,255,255,0.03);
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    border-left: 3px solid $accent;
+}
+
+.eval-lists {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+
+.eval-list {
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    h4 { margin: 0 0 0.5rem; font-size: 0.8rem; font-weight: 600; }
+    ul { margin: 0; padding-left: 1.1rem; }
+    li { font-size: 0.82rem; color: $text-primary; margin-bottom: 0.25rem; line-height: 1.4; }
+
+    &--good    { background: rgba($green, 0.08);   border: 1px solid rgba($green, 0.2);   h4 { color: $green; } }
+    &--improve { background: rgba(#ffa657, 0.08); border: 1px solid rgba(#ffa657, 0.2); h4 { color: #ffa657; } }
+}
+
+.eval-followup {
+    font-size: 0.85rem;
+    padding: 0.75rem;
+    background: rgba(#79c0ff, 0.08);
+    border: 1px solid rgba(#79c0ff, 0.2);
+    border-radius: 0.5rem;
+    line-height: 1.5;
+    color: $text-primary;
+    span { color: #79c0ff; font-weight: 600; }
+}
+
+.mock-next-btn {
+    align-self: flex-end;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.6rem 1.5rem;
+    background: $green;
+    color: #000;
+    border: none;
+    border-radius: 0.4rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: $font;
+    transition: opacity 0.2s;
+    &:hover { opacity: 0.85; }
+}
+
+// ── Done Screen ───────────────────────────────────────────────────────────────
+.mock-done {
+    max-width: 560px;
+    width: 100%;
+    background: $bg-card;
+    border: 1px solid $border;
+    border-radius: 1rem;
+    padding: 2.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.25rem;
+    text-align: center;
+
+    &__icon { display: flex; align-items: center; justify-content: center; }
+    h2 { font-size: 1.5rem; font-weight: 700; margin: 0; }
+}
+
+.done-score-ring {
+    display: flex;
+    align-items: baseline;
+    gap: 0.25rem;
+    border: 3px solid $accent;
+    border-radius: 50%;
+    width: 90px;
+    height: 90px;
+    justify-content: center;
+    align-items: center;
+}
+.done-avg { font-size: 2rem; font-weight: 700; color: $accent; }
+.done-max { font-size: 0.85rem; color: $text-muted; }
+
+.done-summary { color: $text-muted; font-size: 0.9rem; margin: 0; max-width: 380px; }
+
+.done-breakdown {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.done-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.6rem 0.75rem;
+    background: $bg-input;
+    border-radius: 0.4rem;
+    font-size: 0.82rem;
+
+    &__q { color: $text-muted; text-align: left; flex: 1; }
+    &__score {
+        font-weight: 600;
+        font-size: 0.85rem;
+        &.excellent, &.good { color: $green; }
+        &.needs_work { color: $yellow; }
+        &.poor { color: $red; }
+    }
+}
+
+.done-actions {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.mock-back-link {
+    background: none;
+    border: 1px solid $border;
+    color: $text-muted;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    font-family: $font;
+    transition: all 0.2s;
+    &:hover { border-color: $text-muted; color: $text-primary; }
+}
+
