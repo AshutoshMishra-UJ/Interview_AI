@@ -2,38 +2,39 @@ import React, { useState, useEffect, useRef, useCallback } from 'react'
 import '../style/interview.scss'
 import { useInterview } from '../hooks/useInterview.js'
 import { useNavigate, useParams } from 'react-router'
-import { gradeAnswer, generateShareToken, sendSalaryCoachMessage, saveNotes, saveRoadmapProgress, analyzeATS } from '../services/interview.api'
+import { gradeAnswer, generateShareToken, sendSalaryCoachMessage, saveNotes, saveRoadmapProgress, analyzeATS, parseResumePdf } from '../services/interview.api'
+import { useAuth } from '../../auth/hooks/useAuth'
 import Editor from '@monaco-editor/react'
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
-const CodeIcon     = () => <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
-const ChatIcon     = () => <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-const MapIcon      = () => <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
-const CardIcon     = () => <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-const TerminalIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
-const SalaryIcon   = () => <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-const NoteIcon     = () => <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-const ShareIcon    = () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-const DownloadIcon = () => <svg height="13" style={{ marginRight: "0.5rem" }} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M10.6144 17.7956 11.492 15.7854C12.2731 13.9966 13.6789 12.5726 15.4325 11.7942L17.8482 10.7219C18.6162 10.381 18.6162 9.26368 17.8482 8.92277L15.5079 7.88394C13.7092 7.08552 12.2782 5.60881 11.5105 3.75894L10.6215 1.61673C10.2916.821765 9.19319.821767 8.8633 1.61673L7.97427 3.75892C7.20657 5.60881 5.77553 7.08552 3.97685 7.88394L1.63658 8.92277C.868537 9.26368.868536 10.381 1.63658 10.7219L4.0523 11.7942C5.80589 12.5726 7.21171 13.9966 7.99275 15.7854L8.8704 17.7956C9.20776 18.5682 10.277 18.5682 10.6144 17.7956ZM19.4014 22.6899 19.6482 22.1242C20.0882 21.1156 20.8807 20.3125 21.8695 19.8732L22.6299 19.5353C23.0412 19.3526 23.0412 18.7549 22.6299 18.5722L21.9121 18.2532C20.8978 17.8026 20.0911 16.9698 19.6586 15.9269L19.4052 15.3156C19.2285 14.8896 18.6395 14.8896 18.4628 15.3156L18.2094 15.9269C17.777 16.9698 16.9703 17.8026 15.956 18.2532L15.2381 18.5722C14.8269 18.7549 14.8269 19.3526 15.2381 19.5353L15.9985 19.8732C16.9874 20.3125 17.7798 21.1156 18.2198 22.1242L18.4667 22.6899C18.6473 23.104 19.2207 23.104 19.4014 22.6899Z"/></svg>
-const AtsIcon      = () => <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+const CodeIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="16 18 22 12 16 6" /><polyline points="8 6 2 12 8 18" /></svg>
+const ChatIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
+const MapIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11" /></svg>
+const CardIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" /><line x1="8" y1="21" x2="16" y2="21" /><line x1="12" y1="17" x2="12" y2="21" /></svg>
+const TerminalIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="4 17 10 11 4 5" /><line x1="12" y1="19" x2="20" y2="19" /></svg>
+const SalaryIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>
+const NoteIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
+const ShareIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" /></svg>
+const DownloadIcon = () => <svg height="13" style={{ marginRight: "0.5rem" }} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M10.6144 17.7956 11.492 15.7854C12.2731 13.9966 13.6789 12.5726 15.4325 11.7942L17.8482 10.7219C18.6162 10.381 18.6162 9.26368 17.8482 8.92277L15.5079 7.88394C13.7092 7.08552 12.2782 5.60881 11.5105 3.75894L10.6215 1.61673C10.2916.821765 9.19319.821767 8.8633 1.61673L7.97427 3.75892C7.20657 5.60881 5.77553 7.08552 3.97685 7.88394L1.63658 8.92277C.868537 9.26368.868536 10.381 1.63658 10.7219L4.0523 11.7942C5.80589 12.5726 7.21171 13.9966 7.99275 15.7854L8.8704 17.7956C9.20776 18.5682 10.277 18.5682 10.6144 17.7956ZM19.4014 22.6899 19.6482 22.1242C20.0882 21.1156 20.8807 20.3125 21.8695 19.8732L22.6299 19.5353C23.0412 19.3526 23.0412 18.7549 22.6299 18.5722L21.9121 18.2532C20.8978 17.8026 20.0911 16.9698 19.6586 15.9269L19.4052 15.3156C19.2285 14.8896 18.6395 14.8896 18.4628 15.3156L18.2094 15.9269C17.777 16.9698 16.9703 17.8026 15.956 18.2532L15.2381 18.5722C14.8269 18.7549 14.8269 19.3526 15.2381 19.5353L15.9985 19.8732C16.9874 20.3125 17.7798 21.1156 18.2198 22.1242L18.4667 22.6899C18.6473 23.104 19.2207 23.104 19.4014 22.6899Z" /></svg>
+const AtsIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><polyline points="10 9 9 9 8 9" /></svg>
 
 const NAV_ITEMS = [
-    { id: 'technical',  label: 'Technical',  icon: <CodeIcon /> },
+    { id: 'technical', label: 'Technical', icon: <CodeIcon /> },
     { id: 'behavioral', label: 'Behavioral', icon: <ChatIcon /> },
-    { id: 'roadmap',    label: 'Road Map',   icon: <MapIcon /> },
-    { id: 'coding',     label: 'Challenges', icon: <TerminalIcon /> },
-    { id: 'ats',        label: 'ATS Analysis',icon: <AtsIcon /> },
+    { id: 'roadmap', label: 'Road Map', icon: <MapIcon /> },
+    { id: 'coding', label: 'Challenges', icon: <TerminalIcon /> },
+    { id: 'ats', label: 'ATS Analysis', icon: <AtsIcon /> },
     { id: 'flashcards', label: 'Flashcards', icon: <CardIcon /> },
-    { id: 'salary',     label: 'Salary',     icon: <SalaryIcon /> },
-    { id: 'notes',      label: 'Notes',      icon: <NoteIcon /> },
+    { id: 'salary', label: 'Salary', icon: <SalaryIcon /> },
+    { id: 'notes', label: 'Notes', icon: <NoteIcon /> },
 ]
 
 // ── Piston Code Execution ─────────────────────────────────────────────────────
 const PISTON_API = 'https://emkc.org/api/v2/piston/execute'
 const PISTON_LANGS = {
     javascript: { language: 'javascript', version: '*' },
-    python:     { language: 'python',     version: '*'  },
-    java:       { language: 'java',       version: '*'  },
+    python: { language: 'python', version: '*' },
+    java: { language: 'java', version: '*' },
 }
 
 const runCode = async (code, lang) => {
@@ -72,7 +73,7 @@ const QuestionCard = ({ item, index }) => {
                 <span className='q-card__index'>Q{index + 1}</span>
                 <p className='q-card__question'>{item.question}</p>
                 <span className={`q-card__chevron ${open ? 'q-card__chevron--open' : ''}`}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9" /></svg>
                 </span>
             </div>
             {open && (
@@ -168,7 +169,7 @@ const RoadMapDay = ({ day, completedTasks, onToggleTask }) => {
                         <li key={i} className={done ? 'done' : ''} onClick={() => onToggleTask(day.day, i)}>
                             <span className={`roadmap-check ${done ? 'roadmap-check--done' : ''}`}>
                                 {done ? (
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><polyline points="20 6 9 17 4 12" /></svg>
                                 ) : null}
                             </span>
                             {task}
@@ -183,20 +184,20 @@ const RoadMapDay = ({ day, completedTasks, onToggleTask }) => {
 // ── LeetCode Challenge with Code Execution ────────────────────────────────────
 const LANG_OPTIONS = [
     { id: 'javascript', label: 'JavaScript' },
-    { id: 'python',     label: 'Python' },
-    { id: 'java',       label: 'Java' },
+    { id: 'python', label: 'Python' },
+    { id: 'java', label: 'Java' },
 ]
 
 const LANG_STARTERS = {
-    python:     (t) => `# ${t}\n\ndef solution():\n    # Write your solution here\n    pass\n`,
-    java:       (t) => `// ${t}\n\nclass Solution {\n    public int[] solve(int[] input) {\n        // Write your solution here\n        return new int[]{};\n    }\n}`,
+    python: (t) => `# ${t}\n\ndef solution():\n    # Write your solution here\n    pass\n`,
+    java: (t) => `// ${t}\n\nclass Solution {\n    public int[] solve(int[] input) {\n        // Write your solution here\n        return new int[]{};\n    }\n}`,
     javascript: (t) => `/**\n * ${t}\n * @param {*} input\n * @return {*}\n */\nfunction solution(input) {\n    // Write your solution here\n\n};\n`,
 }
 
 const DIFF_MAP = {
-    Easy: { cls: 'easy',   label: 'Easy' },   easy: { cls: 'easy',   label: 'Easy' },
+    Easy: { cls: 'easy', label: 'Easy' }, easy: { cls: 'easy', label: 'Easy' },
     Medium: { cls: 'medium', label: 'Medium' }, medium: { cls: 'medium', label: 'Medium' },
-    Hard: { cls: 'hard',   label: 'Hard' },   hard: { cls: 'hard',   label: 'Hard' },
+    Hard: { cls: 'hard', label: 'Hard' }, hard: { cls: 'hard', label: 'Hard' },
 }
 
 const ChallengeCard = ({ challenge, index }) => {
@@ -367,7 +368,7 @@ const Flashcard = ({ item, index, total, onResult }) => {
                         <span className='flashcard__label'>Question</span>
                         <p className='flashcard__text'>{item.question}</p>
                         <span className='flashcard__tap'>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="1 4 1 10 7 10" /><polyline points="23 20 23 14 17 14" /><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4-4.64 4.36A9 9 0 0 1 3.51 15" /></svg>
                             Tap to reveal
                         </span>
                     </div>
@@ -380,7 +381,7 @@ const Flashcard = ({ item, index, total, onResult }) => {
             {flipped && (
                 <div className='flashcard-actions'>
                     <button className='fc-btn fc-btn--nope' onClick={() => { setFlipped(false); onResult('needs_work') }}>Need Practice</button>
-                    <button className='fc-btn fc-btn--got'  onClick={() => { setFlipped(false); onResult('got_it') }}>Got It</button>
+                    <button className='fc-btn fc-btn--got' onClick={() => { setFlipped(false); onResult('got_it') }}>Got It</button>
                 </div>
             )}
         </div>
@@ -410,7 +411,7 @@ const FlashcardSection = ({ questions, type }) => {
     if (done) return (
         <div className='fc-complete'>
             <div className='fc-complete__icon'>
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#3fb950" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#3fb950" strokeWidth="2"><polyline points="20 6 9 17 4 12" /></svg>
             </div>
             <h3>All Cards Mastered</h3>
             <p>You have completed all {questions.length} questions in this set.</p>
@@ -429,16 +430,26 @@ const FlashcardSection = ({ questions, type }) => {
 
 // ── ATS Analyzer ──────────────────────────────────────────────────────────────
 const AtsAnalyzer = ({ report }) => {
-    const [resumeText, setResumeText] = useState('')
+    const [resumeFile, setResumeFile] = useState(null)
     const [result, setResult] = useState(null)
     const [loading, setLoading] = useState(false)
 
+    const handleFileChange = (e) => {
+        if (e.target.files && e.target.files[0]) {
+            setResumeFile(e.target.files[0])
+        }
+    }
+
     const analyze = async () => {
-        if (!resumeText.trim()) return
+        if (!resumeFile) return
         setLoading(true)
         try {
-            const res = await analyzeATS({ jobDescription: report.jobDescription, resumeText })
-            setResult(res.atsResult)
+            const parsedRes = await parseResumePdf(resumeFile)
+            if (!parsedRes || !parsedRes.text) throw new Error("Failed to extract text from PDF")
+
+            const res = await analyzeATS({ jobDescription: report.jobDescription, resumeText: parsedRes.text })
+            if (!res || !res.ats) throw new Error("Invalid response correctly received from API")
+            setResult(res.ats)
         } catch (e) {
             console.error(e)
             alert('Failed to analyze ATS score')
@@ -449,31 +460,32 @@ const AtsAnalyzer = ({ report }) => {
         <div className='ats-analyzer'>
             {!result ? (
                 <div className='ats-input'>
-                    <p className='ats-input__desc'>Paste the raw text of a resume to evaluate how well it matches the targeted job description.</p>
-                    <textarea 
-                        value={resumeText} 
-                        onChange={e => setResumeText(e.target.value)} 
-                        placeholder='Paste your resume text here...'
-                        rows={12}
-                    />
-                    <button onClick={analyze} disabled={loading || !resumeText.trim()}>
-                        {loading ? 'Analyzing...' : 'Get ATS Score'}
+                    <p className='ats-input__desc'>Upload your Resume PDF to evaluate how well it matches the targeted job description.</p>
+                    <div className='file-upload-box'>
+                        <input type='file' accept='.pdf' id='ats-file' onChange={handleFileChange} className='hidden-input' />
+                        <label htmlFor='ats-file' className='file-label'>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="12" y1="18" x2="12" y2="12" /><polyline points="9 15 12 12 15 15" /></svg>
+                            <span>{resumeFile ? resumeFile.name : "Choose PDF or Drag & Drop"}</span>
+                        </label>
+                    </div>
+                    <button onClick={analyze} disabled={loading || !resumeFile}>
+                        {loading ? 'Analyzing...' : 'Parse & Score Resume'}
                     </button>
                     <span className='ats-hint'>Analysis takes ~15 seconds</span>
                 </div>
             ) : (
                 <div className='ats-result'>
                     <div className='ats-result__header'>
-                        <div className={`ats-score-ring ats-score-ring--${result.matchScore >= 80 ? 'high' : result.matchScore >= 60 ? 'mid' : 'low'}`}>
-                            <span className='ats-score-ring__val'>{result.matchScore}</span>
+                        <div className={`ats-score-ring ats-score-ring--${result.overallScore >= 80 ? 'high' : result.overallScore >= 60 ? 'mid' : 'low'}`}>
+                            <span className='ats-score-ring__val'>{result.overallScore}</span>
                             <span className='ats-score-ring__pct'>%</span>
                         </div>
                         <div className='ats-result__title'>
                             <h3>ATS Match Score</h3>
-                            <p>Verdict: <span style={{ textTransform: 'capitalize', fontWeight: 600 }}>{(result.verdict || '').replace('_', ' ')}</span></p>
+                            <p>Verdict: <span>{result.summary}</span></p>
                         </div>
                     </div>
-                    
+
                     <div className='ats-lists'>
                         <div className='ats-list'>
                             <h4>✅ Matched Keywords</h4>
@@ -489,10 +501,16 @@ const AtsAnalyzer = ({ report }) => {
                         </div>
                     </div>
 
-                    {result.improvementSuggestions?.length > 0 && (
+                    {result.suggestions?.length > 0 && (
                         <div className='ats-suggestions'>
                             <h4>Suggestions for Improvement</h4>
-                            <ul>{result.improvementSuggestions.map((s, i) => <li key={i}>{s}</li>)}</ul>
+                            <ul>
+                                {result.suggestions.map((s, i) => (
+                                    <li key={i}>
+                                        <strong>[{s.section}]</strong> {s.issue} &rarr; <span style={{ color: '#3fb950' }}>{s.fix}</span>
+                                    </li>
+                                ))}
+                            </ul>
                         </div>
                     )}
 
@@ -538,13 +556,30 @@ const SalaryCoach = ({ report }) => {
                 {messages.map((m, i) => (
                     <div key={i} className={`sc-bubble sc-bubble--${m.role}`}>
                         <span className='sc-bubble__label'>{m.role === 'coach' ? 'Coach' : 'You'}</span>
-                        <p>{m.content}</p>
+                        <div className='sc-bubble__content'>
+                            {m.content.split('\n').map((line, idx) => {
+                                const trimmed = line.trim();
+                                if (!trimmed) return null;
+
+                                const renderBold = (str) => {
+                                    return str.split(/\*\*(.*?)\*\*/g).map((part, pIdx) => pIdx % 2 === 1 ? <strong key={pIdx}>{part}</strong> : part);
+                                }
+
+                                if (trimmed.startsWith('-')) {
+                                    return <li key={idx}>{renderBold(trimmed.substring(1).trim())}</li>
+                                } else if (trimmed.startsWith('*')) {
+                                    return <li key={idx}>{renderBold(trimmed.substring(1).trim())}</li>
+                                } else {
+                                    return <p key={idx}>{renderBold(trimmed)}</p>
+                                }
+                            })}
+                        </div>
                     </div>
                 ))}
                 {loading && (
                     <div className='sc-bubble sc-bubble--coach'>
                         <span className='sc-bubble__label'>Coach</span>
-                        <div className='sc-thinking'><span/><span/><span/></div>
+                        <div className='sc-thinking'><span /><span /><span /></div>
                     </div>
                 )}
                 <div ref={bottomRef} />
@@ -628,8 +663,14 @@ const Interview = () => {
     const [flashcardType, setFlashcardType] = useState('technical')
     const [roadmapProgress, setRoadmapProgress] = useState({}) // { dayNum: [taskIndex] }
     const { report, getReportById, loading, getResumePdf } = useInterview()
+    const { handleLogout } = useAuth()
     const { interviewId } = useParams()
     const navigate = useNavigate()
+
+    const onLogout = async () => {
+        await handleLogout()
+        navigate('/login')
+    }
 
     useEffect(() => {
         if (interviewId) getReportById(interviewId)
@@ -689,7 +730,7 @@ const Interview = () => {
 
                     <div className='nav-actions'>
                         <button className='mock-interview-btn' onClick={() => navigate(`/interview/${interviewId}/mock`)}>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="5 3 19 12 5 21 5 3" /></svg>
                             Mock Interview
                         </button>
                         <ShareButton interviewId={interviewId} />
@@ -847,16 +888,20 @@ const Interview = () => {
                     <div className='sidebar-divider' />
                     <div className='sidebar-links'>
                         <button className='sidebar-link-btn' onClick={() => navigate('/')}>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
                             Home
                         </button>
                         <button className='sidebar-link-btn' onClick={() => navigate('/leaderboard')}>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="8" r="6" /><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11" /></svg>
                             Leaderboard
                         </button>
                         <button className='sidebar-link-btn' onClick={() => navigate('/dashboard')}>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" /></svg>
                             Analytics
+                        </button>
+                        <button className='sidebar-link-btn' onClick={onLogout}>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
+                            Logout
                         </button>
                     </div>
                 </aside>

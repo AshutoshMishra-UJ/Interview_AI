@@ -1,170 +1,180 @@
-$bg-page:      #0d1117;
-$bg-card:      #161b22;
-$bg-panel:     #1c2230;
-$bg-input:     #1e2535;
-$border:       #2a3348;
-$text-primary: #e6edf3;
-$text-muted:   #7d8590;
-$accent:       #ff2d78;
-$green:        #3fb950;
-$yellow:       #e3b341;
-$red:          #f85149;
-$font:         system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+$bg-card: rgba(18, 20, 31, 0.52);
+$border: rgba(255, 255, 255, 0.08);
+$text-primary: #f1f5f9;
+$text-muted: #9aa7b8;
+$accent: #6c72e6;
+$green: #3fb950;
+$yellow: #e3b341;
+$red: #f85149;
+$font: 'Inter', system-ui, sans-serif;
 
 .dashboard-page {
     min-height: 100vh;
-    background: $bg-page;
+    width: 100%;
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: 2.25rem 1.4rem 2.6rem;
     color: $text-primary;
     font-family: $font;
-    padding: 2rem;
     display: flex;
     flex-direction: column;
-    gap: 2rem;
-    max-width: 1100px;
-    margin: 0 auto;
-    position: relative;
-    z-index: 1;
-
-    &::before {
-        content: '';
-        position: absolute;
-        top: -100px; left: -10%; right: 0;
-        width: 600px; height: 600px;
-        background: radial-gradient(circle, rgba($accent, 0.15) 0%, rgba($bg-page, 0) 70%);
-        z-index: -1;
-        pointer-events: none;
-    }
+    gap: 1.35rem;
 }
 
-// ── Header ────────────────────────────────────────────────────────────────────
 .dash-header {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
     gap: 1rem;
 
-    h1 { font-size: 1.75rem; font-weight: 700; margin: 0 0 0.25rem; }
-    p { color: $text-muted; margin: 0; font-size: 0.9rem; }
+    h1 {
+        font-size: 1.9rem;
+        letter-spacing: -0.02em;
+        margin: 0 0 0.35rem;
+    }
+
+    p {
+        margin: 0;
+        color: $text-muted;
+    }
+
+    &__actions {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+    }
+}
+
+.dash-new-btn,
+.dash-logout-btn {
+    border-radius: 0.65rem;
+    padding: 0.62rem 1rem;
+    border: 1px solid transparent;
+    font-size: 0.86rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.14s ease, box-shadow 0.22s ease, background 0.22s ease;
 }
 
 .dash-new-btn {
-    padding: 0.6rem 1.25rem;
-    background: linear-gradient(135deg, $accent, darken($accent, 10%));
     color: #fff;
-    border: none;
-    border-radius: 0.5rem;
-    font-size: 0.875rem;
-    font-weight: 600;
-    cursor: pointer;
-    font-family: $font;
-    white-space: nowrap;
-    transition: opacity 0.2s;
-    &:hover { opacity: 0.85; }
+    background: linear-gradient(135deg, #7680f0, #5d64da);
+    border-color: rgba($accent, 0.45);
+
+    &:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 20px rgba($accent, 0.32);
+    }
 }
 
-// ── Stat Cards ────────────────────────────────────────────────────────────────
+.dash-logout-btn {
+    color: #ffb8b1;
+    background: linear-gradient(135deg, rgba($red, 0.2), rgba($red, 0.08));
+    border-color: rgba($red, 0.34);
+
+    &:hover {
+        transform: translateY(-1px);
+        background: linear-gradient(135deg, rgba($red, 0.3), rgba($red, 0.13));
+    }
+}
+
 .dash-stats {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.85rem;
 }
 
 .stat-card {
-    background: rgba(22, 27, 34, 0.4);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.07);
-    border-radius: 1rem;
-    padding: 1.5rem;
+    background: $bg-card;
+    border: 1px solid $border;
+    border-radius: 0.95rem;
+    padding: 1.05rem;
     display: flex;
     align-items: center;
-    gap: 1.25rem;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-
-    &:hover { 
-        border-color: rgba($accent, 0.4); 
-        transform: translateY(-4px);
-        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2), 0 0 20px rgba($accent, 0.15);
-    }
+    gap: 0.9rem;
 
     &__icon {
-        width: 48px;
-        height: 48px;
-        border-radius: 0.75rem;
-        background: linear-gradient(135deg, rgba($accent, 0.2), rgba($accent, 0.05));
-        border: 1px solid rgba($accent, 0.2);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-        svg { stroke: $accent; width: 22px; height: 22px; }
+        width: 42px;
+        height: 42px;
+        border-radius: 0.65rem;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, rgba($accent, 0.23), rgba($accent, 0.08));
+        border: 1px solid rgba($accent, 0.28);
+
+        svg {
+            stroke: #c5c8fb;
+        }
     }
 
-    &__body { display: flex; flex-direction: column; gap: 0.2rem; }
+    &__value {
+        margin: 0;
+        font-size: 1.35rem;
+        font-weight: 800;
+        line-height: 1.1;
+    }
 
-    &__value { font-size: 1.8rem; font-weight: 800; color: #fff; letter-spacing: -0.02em; }
+    &__label {
+        margin: 0.15rem 0 0;
+        font-size: 0.74rem;
+        color: $text-muted;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
 
-    &__label { font-size: 0.85rem; color: #a1aab5; font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; }
-
-    &__sub { font-size: 0.75rem; color: $accent; font-weight: 600; margin-top: 0.1rem; }
+    &__sub {
+        margin: 0.22rem 0 0;
+        font-size: 0.75rem;
+        color: #b7c1ce;
+    }
 }
 
-// ── Charts ────────────────────────────────────────────────────────────────────
 .dash-charts {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.25rem;
-
-    @media (max-width: 760px) { grid-template-columns: 1fr; }
+    grid-template-columns: 1.2fr 1fr;
+    gap: 0.85rem;
 }
 
 .chart-card {
-    background: rgba(22, 27, 34, 0.4);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 1rem;
-    padding: 1.5rem;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    background: $bg-card;
+    border: 1px solid $border;
+    border-radius: 0.95rem;
+    padding: 1rem;
 
     &__title {
-        font-size: 1rem;
-        font-weight: 600;
-        margin: 0 0 1.5rem;
-        color: #fff;
-        text-transform: uppercase;
+        margin: 0 0 0.95rem;
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: #d9e0ea;
         letter-spacing: 0.04em;
+        text-transform: uppercase;
     }
 }
 
 .chart-empty {
-    height: 180px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: $text-muted;
-    font-size: 0.875rem;
+    min-height: 200px;
+    display: grid;
+    place-items: center;
     text-align: center;
-    line-height: 1.6;
+    color: $text-muted;
+    font-size: 0.88rem;
 }
 
-// ── Skill Gap Bars ─────────────────────────────────────────────────────────────
 .sg-list {
     display: flex;
     flex-direction: column;
-    gap: 0.85rem;
+    gap: 0.68rem;
 }
 
 .sg-row {
     display: grid;
-    grid-template-columns: 140px 1fr 36px;
+    grid-template-columns: 122px 1fr 28px;
     align-items: center;
-    gap: 0.75rem;
+    gap: 0.6rem;
 
     &__label {
         font-size: 0.8rem;
-        color: $text-muted;
+        color: #c8d0dc;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -172,37 +182,30 @@ $font:         system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
 
     &__track {
         height: 8px;
-        background: rgba(255,255,255,0.04);
-        border-radius: 6px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.06);
         overflow: hidden;
-        box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
     }
 
     &__fill {
         height: 100%;
-        border-radius: 6px;
-        transition: width 0.8s cubic-bezier(0.1, 0.8, 0.2, 1);
-        position: relative;
-        &::after {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 100%);
-            border-radius: 6px;
-        }
+        border-radius: 999px;
     }
 
     &__count {
-        font-size: 0.8rem;
-        font-weight: 700;
-        color: #fff;
+        font-size: 0.76rem;
+        color: #dbe3f0;
         text-align: right;
+        font-weight: 700;
     }
 }
 
-// ── Recent Reports ────────────────────────────────────────────────────────────
 .dash-reports {
-    h2 { font-size: 1rem; font-weight: 600; margin: 0 0 0.75rem; }
+    h2 {
+        margin: 0 0 0.8rem;
+        font-size: 1rem;
+        font-weight: 700;
+    }
 
     &__grid {
         display: grid;
@@ -212,54 +215,103 @@ $font:         system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
 }
 
 .dash-report-card {
-    background: rgba(22, 27, 34, 0.4);
-    backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 1rem;
-    padding: 1.25rem;
+    background: rgba(18, 20, 31, 0.62);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 0.88rem;
+    padding: 0.9rem 0.95rem;
     cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.14s ease, border-color 0.2s ease, background 0.2s ease;
 
-    &:hover { 
-        border-color: rgba(255, 255, 255, 0.15); 
-        transform: translateY(-4px); 
-        background: rgba(22, 27, 34, 0.6);
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    &:hover {
+        transform: translateY(-2px);
+        border-color: rgba($accent, 0.33);
+        background: rgba(24, 27, 42, 0.74);
     }
 
     &__header {
         display: flex;
-        align-items: flex-start;
         justify-content: space-between;
         gap: 0.5rem;
-        h3 { font-size: 0.95rem; font-weight: 600; margin: 0; flex: 1; color: #fff; line-height: 1.4; }
+
+        h3 {
+            margin: 0;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
     }
 
-    &__date { font-size: 0.8rem; color: #8b949e; }
+    &__date {
+        margin-top: 0.45rem;
+        color: $text-muted;
+        font-size: 0.78rem;
+    }
 }
 
 .score-badge {
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     font-weight: 700;
-    padding: 0.2rem 0.5rem;
-    border-radius: 0.3rem;
+    border-radius: 999px;
+    padding: 0.18rem 0.5rem;
     white-space: nowrap;
 
-    &--high { background: rgba($green, 0.15); color: $green; }
-    &--mid { background: rgba($yellow, 0.15); color: $yellow; }
-    &--low { background: rgba($red, 0.15); color: $red; }
+    &--high {
+        background: rgba($green, 0.16);
+        color: $green;
+    }
+
+    &--mid {
+        background: rgba($yellow, 0.16);
+        color: $yellow;
+    }
+
+    &--low {
+        background: rgba($red, 0.16);
+        color: $red;
+    }
 }
 
 .company-tag {
-    font-size: 0.7rem;
-    padding: 0.15rem 0.5rem;
-    background: rgba($accent, 0.1);
-    color: $accent;
-    border-radius: 0.3rem;
-    border: 1px solid rgba($accent, 0.2);
-    width: fit-content;
+    margin-top: 0.45rem;
+    display: inline-flex;
+    padding: 0.15rem 0.48rem;
+    border-radius: 0.35rem;
+    border: 1px solid rgba($accent, 0.28);
+    color: #c8cdff;
+    background: rgba($accent, 0.12);
+    font-size: 0.72rem;
     text-transform: capitalize;
+}
+
+@media (max-width: 980px) {
+    .dash-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .dash-charts {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 640px) {
+    .dashboard-page {
+        padding: 1.15rem 0.8rem 2rem;
+    }
+
+    .dash-header {
+        flex-direction: column;
+        align-items: stretch;
+
+        &__actions {
+            width: 100%;
+        }
+    }
+
+    .dash-new-btn,
+    .dash-logout-btn {
+        flex: 1;
+    }
+
+    .dash-stats {
+        grid-template-columns: 1fr;
+    }
 }

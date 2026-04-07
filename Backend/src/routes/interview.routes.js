@@ -26,6 +26,7 @@ interviewRouter.get("/share/view/:token", interviewController.getSharedReportCon
 
 // ── Tier 1: ATS Score ─────────────────────────────────────────────────────────
 interviewRouter.post("/ats-score", authMiddleware.authUser, interviewController.analyzeATSController)
+interviewRouter.post("/resume/parse", authMiddleware.authUser, upload.single("resume"), interviewController.parseResumePdfController)
 
 // ── Tier 2: Salary Coach ──────────────────────────────────────────────────────
 interviewRouter.post("/salary-coach", authMiddleware.authUser, interviewController.salaryCoachController)

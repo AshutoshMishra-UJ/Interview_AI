@@ -1,18 +1,18 @@
-// ── Variables ────────────────────────────────────────────────────────────────
-$bg-page:        #0d1117;
-$bg-card:        #161b22;
-$bg-panel:       #1c2230;
-$bg-input:       #1e2535;
-$border-color:   #2a3348;
-$text-primary:   #e6edf3;
-$text-muted:     #7d8590;
-$accent:         #ff2d78;
-$accent-alt:     #ff6b9d;
-$badge-required: #ff2d78;
-$badge-best:     #ff2d78;
-$info-bg:        #1b2a4a;
-$info-border:    #2d4a7a;
-$font-stack:     system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+// ── Variables (Mapped to Global Dark Fade) ────────────────────────────────────────────────────────────────
+$bg-page: transparent;
+$bg-card: rgba(18, 20, 31, 0.5);
+$bg-panel: rgba(22, 27, 45, 0.4);
+$bg-input: rgba(18, 20, 31, 0.3);
+$border-color: rgba(255, 255, 255, 0.06);
+$text-primary: #f1f5f9;
+$text-muted: #94a3b8;
+$accent: #6C72E6;
+$accent-alt: #9196f2;
+$badge-required: #6C72E6;
+$badge-best: #6C72E6;
+$info-bg: rgba(108, 114, 230, 0.1);
+$info-border: rgba(108, 114, 230, 0.3);
+$font-stack: 'Inter', system-ui, sans-serif;
 
 // ── Page Shell ───────────────────────────────────────────────────────────────
 .home-page {
@@ -58,9 +58,12 @@ $font-stack:     system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Robot
 .interview-card {
     width: 100%;
     max-width: 900px;
-    background-color: $bg-card;
-    border: 1px solid $border-color;
+    background-color: var(--bg-card);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border-color);
     border-radius: 1rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
     overflow: hidden;
 
     &__body {
@@ -350,19 +353,19 @@ $font-stack:     system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Robot
     }
 }
 
-.recent-reports{
+.recent-reports {
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
     width: 100%;
     max-width: 900px;
 
-    .reports-list{
+    .reports-list {
         display: flex;
         gap: 0.75rem;
         flex-wrap: wrap;
 
-        .report-item{
+        .report-item {
             background-color: $bg-card;
             border: 1px solid $border-color;
             border-radius: 0.5rem;
@@ -424,22 +427,52 @@ $font-stack:     system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Robot
         letter-spacing: -0.02em;
     }
 
+    &__actions {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
     &__dash {
         display: flex;
         align-items: center;
         gap: 0.4rem;
-        padding: 0.45rem 1rem;
-        background: rgba($accent, 0.1);
-        border: 1px solid rgba($accent, 0.25);
-        border-radius: 0.4rem;
+        padding: 0.48rem 1rem;
+        background: linear-gradient(135deg, rgba($accent, 0.23), rgba($accent, 0.08));
+        border: 1px solid rgba($accent, 0.35);
+        border-radius: 0.5rem;
         color: $accent;
         font-family: $font-stack;
         font-size: 0.85rem;
         font-weight: 600;
         cursor: pointer;
-        transition: background 0.2s;
+        transition: background 0.2s, border-color 0.2s, transform 0.12s;
         text-decoration: none;
-        &:hover { background: rgba($accent, 0.2); }
+
+        &:hover {
+            background: linear-gradient(135deg, rgba($accent, 0.3), rgba($accent, 0.12));
+            border-color: rgba($accent, 0.5);
+            transform: translateY(-1px);
+        }
+    }
+
+    &__logout {
+        padding: 0.48rem 0.95rem;
+        background: linear-gradient(135deg, rgba(#f85149, 0.16), rgba(#f85149, 0.06));
+        border: 1px solid rgba(#f85149, 0.34);
+        border-radius: 0.5rem;
+        color: #ffb4ad;
+        font-family: $font-stack;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s, border-color 0.2s, transform 0.12s;
+
+        &:hover {
+            background: linear-gradient(135deg, rgba(#f85149, 0.24), rgba(#f85149, 0.12));
+            border-color: rgba(#f85149, 0.45);
+            transform: translateY(-1px);
+        }
     }
 }
 
@@ -475,12 +508,71 @@ $font-stack:     system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Robot
     font-family: $font-stack;
     transition: all 0.15s;
 
-    &:hover { border-color: $accent; color: $accent; }
+    &:hover {
+        border-color: $accent;
+        color: $accent;
+    }
 
     &--active {
         border-color: $accent;
         background: rgba($accent, 0.12);
         color: $accent;
         font-weight: 600;
+    }
+}
+
+.ai-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.4rem 0.7rem;
+    border: 1px solid $border-color;
+    border-radius: 0.65rem;
+    background: rgba($bg-panel, 0.45);
+
+    &__label {
+        font-size: 0.82rem;
+        color: $text-muted;
+        font-weight: 600;
+    }
+
+    &__switch {
+        width: 44px;
+        height: 24px;
+        border: 1px solid $border-color;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
+        position: relative;
+        cursor: pointer;
+        padding: 0;
+        transition: background 0.2s ease, border-color 0.2s ease;
+
+        &--on {
+            background: rgba($accent, 0.28);
+            border-color: rgba($accent, 0.6);
+
+            .ai-toggle__thumb {
+                left: 22px;
+                background: $accent;
+            }
+        }
+    }
+
+    &__thumb {
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: #cbd5e1;
+        transition: left 0.2s ease, background 0.2s ease;
+    }
+
+    &__mode {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: $text-primary;
+        min-width: 34px;
     }
 }

@@ -1,18 +1,21 @@
 import axios from "axios"
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000"
+
 const api = axios.create({
-    baseURL: "http://localhost:3000",
+    baseURL: API_BASE_URL,
     withCredentials: true,
 })
 
 // ── Core ──────────────────────────────────────────────────────────────────────
 
-export const generateInterviewReport = async ({ jobDescription, selfDescription, resumeFile, companyPreset }) => {
+export const generateInterviewReport = async ({ jobDescription, selfDescription, resumeFile, companyPreset, aiMode }) => {
     const formData = new FormData()
     formData.append("jobDescription", jobDescription)
     formData.append("selfDescription", selfDescription)
     if (resumeFile) formData.append("resume", resumeFile)
     if (companyPreset) formData.append("companyPreset", companyPreset)
+    if (aiMode) formData.append("aiMode", aiMode)
 
     const response = await api.post("/api/interview/", formData, {
         headers: { "Content-Type": "multipart/form-data" }
@@ -73,6 +76,15 @@ export const getSharedReport = async (token) => {
 }
 
 // ── Tier 1: ATS Score ─────────────────────────────────────────────────────────
+
+export const parseResumePdf = async (resumeFile) => {
+    const formData = new FormData()
+    formData.append("resume", resumeFile)
+    const response = await api.post("/api/interview/resume/parse", formData, {
+        headers: { "Content-Type": "multipart/form-data" }
+    })
+    return response.data
+}
 
 export const analyzeATS = async ({ jobDescription, resumeText }) => {
     const response = await api.post("/api/interview/ats-score", { jobDescription, resumeText })

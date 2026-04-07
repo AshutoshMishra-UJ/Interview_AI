@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react'
 import "../style/home.scss"
 import { useInterview } from '../hooks/useInterview.js'
 import { useNavigate } from 'react-router'
+import { useAuth } from '../../auth/hooks/useAuth.js'
 
 /* ── Drag-and-drop resume dropzone ───────────────────────────── */
 function ResumeDropzone({ resumeInputRef }) {
@@ -72,11 +73,11 @@ function ResumeDropzone({ resumeInputRef }) {
                 <span className='dropzone__icon'>
                     {selectedFile ? (
                         <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                            <polyline points="14 2 14 8 20 8"/>
-                            <line x1="16" y1="13" x2="8" y2="13"/>
-                            <line x1="16" y1="17" x2="8" y2="17"/>
-                            <polyline points="10 9 9 9 8 9"/>
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                            <polyline points="14 2 14 8 20 8" />
+                            <line x1="16" y1="13" x2="8" y2="13" />
+                            <line x1="16" y1="17" x2="8" y2="17" />
+                            <polyline points="10 9 9 9 8 9" />
                         </svg>
                     ) : (
                         <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -128,17 +129,60 @@ const COMPANIES = [
 const Home = () => {
 
     const { loading, generateReport, reports } = useInterview()
-    const [ jobDescription, setJobDescription ] = useState("")
-    const [ selfDescription, setSelfDescription ] = useState("")
-    const [ companyPreset, setCompanyPreset ] = useState("default")
+    const { handleLogout } = useAuth()
+    const [jobDescription, setJobDescription] = useState("")
+    const [selfDescription, setSelfDescription] = useState("")
+    const [companyPreset, setCompanyPreset] = useState("default")
+    const [useGeminiAi, setUseGeminiAi] = useState(true)
     const resumeInputRef = useRef()
+    const mockModeNotifiedRef = useRef(false)
 
     const navigate = useNavigate()
 
+    const onLogout = async () => {
+        await handleLogout()
+        navigate('/login')
+    }
+
     const handleGenerateReport = async () => {
-        const resumeFile = resumeInputRef.current.files[0]
-        const data = await generateReport({ jobDescription, selfDescription, resumeFile, companyPreset })
-        navigate(`/interview/${data._id}`)
+        const resumeFile = resumeInputRef.current?.files?.[0]
+
+        if (!jobDescription.trim()) {
+            alert("Please add the target job description.")
+            return
+        }
+
+        if (!resumeFile && !selfDescription.trim()) {
+            alert("Please upload a resume or add a self-description.")
+            return
+        }
+
+        try {
+            const data = await generateReport({
+                jobDescription,
+                selfDescription,
+                resumeFile,
+                companyPreset,
+                aiMode: useGeminiAi ? "live" : "mock"
+            })
+            if (!data?._id) {
+                alert("Report generated but could not open it. Please try again.")
+                return
+            }
+
+            if (data?.__source === "mock" && data?.__fallbackReason === "insufficient_credit") {
+                setUseGeminiAi(false)
+                alert("Gemini credits are insufficient. Switched to Mock AI mode automatically.")
+                mockModeNotifiedRef.current = true
+            } else if (data?.__source === "mock" && !mockModeNotifiedRef.current) {
+                alert("Mock AI mode is enabled. Results are simulated for functional testing.")
+                mockModeNotifiedRef.current = true
+            }
+
+            navigate(`/interview/${data._id}`)
+        } catch (error) {
+            alert(error?.message || "Failed to generate report. Please try again in a moment.")
+        }
     }
 
     if (loading) {
@@ -155,9 +199,14 @@ const Home = () => {
             {/* Top Nav */}
             <div className='home-topnav'>
                 <span className='home-topnav__brand'>⚡ InterviewAI</span>
-                <button className='home-topnav__dash' onClick={() => navigate('/dashboard')}>
-                    📊 Dashboard
-                </button>
+                <div className='home-topnav__actions'>
+                    <button className='home-topnav__dash' onClick={() => navigate('/dashboard')}>
+                        📊 Dashboard
+                    </button>
+                    <button className='home-topnav__logout' onClick={onLogout}>
+                        Logout
+                    </button>
+                </div>
             </div>
 
             {/* Page Header */}
@@ -180,6 +229,20 @@ const Home = () => {
                         </button>
                     ))}
                 </div>
+            </div>
+
+            <div className='ai-toggle'>
+                <span className='ai-toggle__label'>Use Gemini AI</span>
+                <button
+                    type='button'
+                    className={`ai-toggle__switch${useGeminiAi ? ' ai-toggle__switch--on' : ''}`}
+                    onClick={() => setUseGeminiAi((prev) => !prev)}
+                    aria-pressed={useGeminiAi}
+                    title={useGeminiAi ? 'Gemini AI enabled' : 'Mock AI enabled'}
+                >
+                    <span className='ai-toggle__thumb' />
+                </button>
+                <span className='ai-toggle__mode'>{useGeminiAi ? 'Live' : 'Mock'}</span>
             </div>
 
             {/* Main Card */}

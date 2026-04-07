@@ -1,8 +1,36 @@
 const pdfParse = require("pdf-parse")
 const crypto = require("crypto")
-const { generateInterviewReport, generateResumePdf, gradeAnswer, evaluateMockAnswer, analyzeATSScore, getSalaryCoachReply } = require("../services/ai.service")
+const { generateInterviewReport, generateResumePdf, gradeAnswer, evaluateMockAnswer, analyzeATSScore, getSalaryCoachReply, isMockAiEnabled } = require("../services/ai.service")
 const interviewReportModel = require("../models/interviewReport.model")
 const userModel = require("../models/user.model")
+
+const getAiSource = () => (isMockAiEnabled() ? "mock" : "live")
+
+function normalizeControllerError(err, fallbackMessage) {
+    const status = Number.isInteger(err?.status)
+        ? err.status
+        : (Number.isInteger(err?.response?.status) ? err.response.status : 500)
+
+    let message = err?.message || err?.response?.data?.message || fallbackMessage
+
+    if (typeof message === "string" && message.trim().startsWith("{")) {
+        try {
+            const parsed = JSON.parse(message)
+            message = parsed?.error?.message || message
+        } catch (_) {
+            // Keep original message when parsing fails.
+        }
+    }
+
+    if (status === 429 || /quota|rate limit|resource_exhausted/i.test(String(message))) {
+        return {
+            status: 429,
+            message: "AI request quota exceeded. Please wait and try again, or update your Gemini API plan."
+        }
+    }
+
+    return { status: status >= 400 ? status : 500, message }
+}
 
 
 // ── Generate Report ───────────────────────────────────────────────────────────
@@ -10,17 +38,18 @@ async function generateInterViewReportController(req, res) {
     try {
         let resumeContent = ""
         if (req.file) {
-            const parsed = await (new pdfParse.PDFParse(Uint8Array.from(req.file.buffer))).getText()
-            resumeContent = parsed.text
+            const rawText = await (new pdfParse.PDFParse(Uint8Array.from(req.file.buffer))).getText()
+            resumeContent = rawText
         }
 
-        const { selfDescription, jobDescription, companyPreset } = req.body
+        const { selfDescription, jobDescription, companyPreset, aiMode } = req.body
 
-        const interViewReportByAi = await generateInterviewReport({
+        const aiResult = await generateInterviewReport({
             resume: resumeContent,
             selfDescription,
             jobDescription,
-            companyPreset: companyPreset || "default"
+            companyPreset: companyPreset || "default",
+            aiMode: aiMode || "live"
         })
 
         const interviewReport = await interviewReportModel.create({
@@ -29,26 +58,26 @@ async function generateInterViewReportController(req, res) {
             selfDescription,
             jobDescription,
             companyPreset: companyPreset || "default",
-            ...interViewReportByAi
+            ...aiResult.interviewReport
         })
 
         // ── Update Streak & XP ───────────────────────────────
         try {
             const user = await userModel.findById(req.user.id)
-            const today = new Date(); today.setHours(0,0,0,0)
-            const last  = user.lastPracticeDate ? new Date(user.lastPracticeDate) : null
-            if (last) last.setHours(0,0,0,0)
+            const today = new Date(); today.setHours(0, 0, 0, 0)
+            const last = user.lastPracticeDate ? new Date(user.lastPracticeDate) : null
+            if (last) last.setHours(0, 0, 0, 0)
 
             const dayDiff = last ? Math.floor((today - last) / 86400000) : null
 
             let newStreak = user.practiceStreak || 0
             if (dayDiff === null || dayDiff > 1) newStreak = 1          // first time or broken
-            else if (dayDiff === 1)              newStreak = newStreak + 1 // consecutive day
+            else if (dayDiff === 1) newStreak = newStreak + 1 // consecutive day
             // dayDiff === 0 => same day, keep streak
 
             await userModel.findByIdAndUpdate(req.user.id, {
-                practiceStreak:   newStreak,
-                longestStreak:    Math.max(newStreak, user.longestStreak || 0),
+                practiceStreak: newStreak,
+                longestStreak: Math.max(newStreak, user.longestStreak || 0),
                 lastPracticeDate: new Date(),
                 $inc: { totalXP: 50, totalSessions: 1 }
             })
@@ -56,10 +85,16 @@ async function generateInterViewReportController(req, res) {
             console.warn("Streak update failed (non-critical):", streakErr.message)
         }
 
-        res.status(201).json({ message: "Interview report generated successfully.", interviewReport })
+        res.status(201).json({
+            message: "Interview report generated successfully.",
+            interviewReport,
+            source: aiResult.source,
+            fallbackReason: aiResult.fallbackReason || null
+        })
     } catch (err) {
         console.error("generateInterViewReport Error:", err)
-        res.status(500).json({ message: err.message })
+        const normalized = normalizeControllerError(err, "Failed to generate interview report.")
+        res.status(normalized.status).json({ message: normalized.message })
     }
 }
 
@@ -104,11 +139,13 @@ async function generateResumePdfController(req, res) {
 
         res.set({
             "Content-Type": "application/pdf",
-            "Content-Disposition": `attachment; filename=resume_${interviewReportId}.pdf`
+            "Content-Disposition": `attachment; filename=resume_${interviewReportId}.pdf`,
+            "X-AI-Source": getAiSource()
         })
         res.send(pdfBuffer)
     } catch (err) {
-        res.status(500).json({ message: err.message })
+        const normalized = normalizeControllerError(err, "Failed to generate resume PDF.")
+        res.status(normalized.status).json({ message: normalized.message })
     }
 }
 
@@ -122,7 +159,7 @@ async function gradeAnswerController(req, res) {
         }
 
         const grade = await gradeAnswer({ question, modelAnswer, userAnswer })
-        res.status(200).json({ message: "Answer graded successfully.", grade })
+        res.status(200).json({ message: "Answer graded successfully.", grade, source: getAiSource() })
     } catch (err) {
         console.error("gradeAnswer Error:", err)
         res.status(500).json({ message: err.message })
@@ -151,7 +188,7 @@ async function evaluateMockAnswerController(req, res) {
             jobTitle: report.title
         })
 
-        res.status(200).json({ message: "Answer evaluated.", evaluation })
+        res.status(200).json({ message: "Answer evaluated.", evaluation, source: getAiSource() })
     } catch (err) {
         console.error("evaluateMockAnswer Error:", err)
         res.status(500).json({ message: err.message })
@@ -247,7 +284,7 @@ async function analyzeATSController(req, res) {
         const { jobDescription, resumeText } = req.body
         if (!jobDescription) return res.status(400).json({ message: "jobDescription is required." })
         const result = await analyzeATSScore({ resumeText: resumeText || "", jobDescription })
-        res.status(200).json({ message: "ATS analysis complete.", ats: result })
+        res.status(200).json({ message: "ATS analysis complete.", ats: result, source: getAiSource() })
     } catch (err) {
         console.error("analyzeATS Error:", err)
         res.status(500).json({ message: err.message })
@@ -261,7 +298,7 @@ async function salaryCoachController(req, res) {
         const { role, company, experience, userMessage, conversationHistory } = req.body
         if (!userMessage) return res.status(400).json({ message: "userMessage is required." })
         const reply = await getSalaryCoachReply({ role, company, experience, userMessage, conversationHistory })
-        res.status(200).json({ message: "Salary coach reply.", reply })
+        res.status(200).json({ message: "Salary coach reply.", reply, source: getAiSource() })
     } catch (err) {
         console.error("salaryCoach Error:", err)
         res.status(500).json({ message: err.message })
@@ -338,6 +375,20 @@ async function getStreakController(req, res) {
 }
 
 
+// ── Parse Resume PDF (Standalone/ATS) ─────────────────────────────────────────
+async function parseResumePdfController(req, res) {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ message: "No PDF file provided." })
+        }
+        const rawText = await (new pdfParse.PDFParse(Uint8Array.from(req.file.buffer))).getText()
+        res.status(200).json({ message: "PDF parsed successfully", text: rawText })
+    } catch (err) {
+        console.error("parseResumePdf Error:", err)
+        res.status(500).json({ message: err.message })
+    }
+}
+
 module.exports = {
     generateInterViewReportController,
     getInterviewReportByIdController,
@@ -353,5 +404,6 @@ module.exports = {
     getLeaderboardController,
     saveNotesController,
     updateRoadmapProgressController,
-    getStreakController
+    getStreakController,
+    parseResumePdfController
 }
