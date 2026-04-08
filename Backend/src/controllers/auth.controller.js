@@ -1,7 +1,12 @@
 const userModel = require("../models/user.model")
 const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")
+const mongoose = require("mongoose")
 const tokenBlacklistModel = require("../models/blacklist.model")
+
+function isDatabaseConnected() {
+    return mongoose.connection.readyState === 1
+}
 
 /**
  * @name registerUserController
@@ -11,6 +16,10 @@ const tokenBlacklistModel = require("../models/blacklist.model")
 async function registerUserController(req, res) {
 
     try {
+        if (!isDatabaseConnected()) {
+            return res.status(503).json({ message: "Database unavailable. Please try again shortly." })
+        }
+
         const { username, email, password } = req.body
 
         if (!username || !email || !password) {
@@ -20,7 +29,7 @@ async function registerUserController(req, res) {
         }
 
         const isUserAlreadyExists = await userModel.findOne({
-            $or: [ { username }, { email } ]
+            $or: [{ username }, { email }]
         })
 
         if (isUserAlreadyExists) {
@@ -73,6 +82,10 @@ async function registerUserController(req, res) {
 async function loginUserController(req, res) {
 
     try {
+        if (!isDatabaseConnected()) {
+            return res.status(503).json({ message: "Database unavailable. Please try again shortly." })
+        }
+
         const { email, password } = req.body
 
         const user = await userModel.findOne({ email })
@@ -123,6 +136,10 @@ async function loginUserController(req, res) {
  * @access public
  */
 async function logoutUserController(req, res) {
+    if (!isDatabaseConnected()) {
+        return res.status(503).json({ message: "Database unavailable. Please try again shortly." })
+    }
+
     const token = req.cookies.token
 
     if (token) {
@@ -142,6 +159,10 @@ async function logoutUserController(req, res) {
  * @access private
  */
 async function getMeController(req, res) {
+
+    if (!isDatabaseConnected()) {
+        return res.status(503).json({ message: "Database unavailable. Please try again shortly." })
+    }
 
     const user = await userModel.findById(req.user.id)
 

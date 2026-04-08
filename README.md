@@ -105,16 +105,43 @@ npm run dev
 - Shareable interview reports
 - Resume PDF generation
 
+## Experimental GenAI (Safe / Isolated)
+
+An isolated Company-aware RAG prep endpoint is included for advanced experimentation.
+It is disabled by default and does not affect existing interview routes.
+
+- Endpoint: `POST /api/experimental/rag-plan`
+- Guarded by auth and feature flag
+- Enable with backend env:
+
+```env
+ENABLE_EXPERIMENTAL_RAG=true
+```
+
+Sample payload:
+
+```json
+{
+  "jobDescription": "Senior Frontend Engineer role...",
+  "docs": [
+    { "title": "Company Engineering Blog", "content": "..." },
+    { "title": "Interview Experience Notes", "content": "..." }
+  ]
+}
+```
+
+If the model fails or quota is exhausted, the endpoint falls back safely with a deterministic prep response.
+
 ## Development Commands
 
-### Backend
+### Backend Commands
 
 ```bash
 npm run dev
 npm start
 ```
 
-### Frontend
+### Frontend Commands
 
 ```bash
 npm run dev
