@@ -32,6 +32,33 @@ function normalizeControllerError(err, fallbackMessage) {
     return { status: status >= 400 ? status : 500, message }
 }
 
+function toPlainResumeText(parsedResume) {
+    if (!parsedResume) return ""
+    if (typeof parsedResume === "string") return parsedResume
+
+    if (Array.isArray(parsedResume)) {
+        return parsedResume
+            .map((item) => toPlainResumeText(item))
+            .filter(Boolean)
+            .join("\n")
+    }
+
+    if (typeof parsedResume === "object") {
+        if (typeof parsedResume.text === "string") {
+            return parsedResume.text
+        }
+
+        if (Array.isArray(parsedResume.pages)) {
+            return parsedResume.pages
+                .map((page) => (typeof page?.text === "string" ? page.text : ""))
+                .filter(Boolean)
+                .join("\n")
+        }
+    }
+
+    return ""
+}
+
 
 // ── Generate Report ───────────────────────────────────────────────────────────
 async function generateInterViewReportController(req, res) {
@@ -40,7 +67,7 @@ async function generateInterViewReportController(req, res) {
         if (req.file) {
             try {
                 const rawText = await (new pdfParse.PDFParse(Uint8Array.from(req.file.buffer))).getText()
-                resumeContent = rawText
+                resumeContent = toPlainResumeText(rawText)
             } catch (parseErr) {
                 console.warn("Resume parsing failed, continuing without resume text:", parseErr.message)
             }
