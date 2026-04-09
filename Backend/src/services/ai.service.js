@@ -187,6 +187,19 @@ function buildMockInterviewReport({ jobDescription, companyPreset }) {
     }
 }
 
+function buildMockAnswerGrade() {
+    return {
+        overallScore: 7,
+        accuracyScore: 7,
+        depthScore: 6,
+        clarityScore: 8,
+        strengths: ["Clear structure", "Relevant terminology"],
+        improvements: ["Add concrete example", "Explain trade-offs explicitly"],
+        missedKeyPoints: ["One key edge case from model answer"],
+        verdict: "good"
+    }
+}
+
 function buildMockResumeHtml({ selfDescription, jobDescription }) {
     return `
     <html>
@@ -262,14 +275,11 @@ async function generateInterviewReport({ resume, selfDescription, jobDescription
             fallbackReason: null
         }
     } catch (err) {
-        if (aiMode === "live" && isQuotaOrCreditError(err)) {
-            return {
-                interviewReport: buildMockInterviewReport({ jobDescription, companyPreset }),
-                source: "mock",
-                fallbackReason: "insufficient_credit"
-            }
+        return {
+            interviewReport: buildMockInterviewReport({ jobDescription, companyPreset }),
+            source: "mock",
+            fallbackReason: isQuotaOrCreditError(err) ? "insufficient_credit" : "live_error_fallback"
         }
-        throw err
     }
 }
 
@@ -277,16 +287,7 @@ async function generateInterviewReport({ resume, selfDescription, jobDescription
 async function gradeAnswer({ question, modelAnswer, userAnswer }) {
 
     if (USE_MOCK_AI) {
-        return {
-            overallScore: 7,
-            accuracyScore: 7,
-            depthScore: 6,
-            clarityScore: 8,
-            strengths: ["Clear structure", "Relevant terminology"],
-            improvements: ["Add concrete example", "Explain trade-offs explicitly"],
-            missedKeyPoints: ["One key edge case from model answer"],
-            verdict: "good"
-        }
+        return buildMockAnswerGrade()
     }
 
     const prompt = `You are an expert technical interviewer grading a candidate's answer.
@@ -299,16 +300,23 @@ Candidate's Answer: ${userAnswer}
 
 Grade the candidate's answer fairly and constructively. Be specific in feedback.`
 
-    const response = await ai.models.generateContent({
-        model: MODEL,
-        contents: prompt,
-        config: {
-            responseMimeType: "application/json",
-            responseSchema: zodToJsonSchema(answerGradeSchema),
-        }
-    })
+    try {
+        const response = await ai.models.generateContent({
+            model: MODEL,
+            contents: prompt,
+            config: {
+                responseMimeType: "application/json",
+                responseSchema: zodToJsonSchema(answerGradeSchema),
+            }
+        })
 
-    return JSON.parse(response.text)
+        return JSON.parse(response.text)
+    } catch (err) {
+        if (isQuotaOrCreditError(err)) {
+            return buildMockAnswerGrade()
+        }
+        throw err
+    }
 }
 
 
@@ -339,16 +347,31 @@ Candidate's Answer: ${userAnswer}
 
 Evaluate the answer and decide if the interview session should continue or wrap up (set isComplete=true after 5+ exchanges or if all key areas have been covered).`
 
-    const response = await ai.models.generateContent({
-        model: MODEL,
-        contents: prompt,
-        config: {
-            responseMimeType: "application/json",
-            responseSchema: zodToJsonSchema(mockEvaluationSchema),
-        }
-    })
+    try {
+        const response = await ai.models.generateContent({
+            model: MODEL,
+            contents: prompt,
+            config: {
+                responseMimeType: "application/json",
+                responseSchema: zodToJsonSchema(mockEvaluationSchema),
+            }
+        })
 
-    return JSON.parse(response.text)
+        return JSON.parse(response.text)
+    } catch (err) {
+        if (isQuotaOrCreditError(err)) {
+            return {
+                score: 7,
+                verdict: "good",
+                feedback: "Solid answer structure and relevant points. Add one real-world example and quantify impact for a stronger response.",
+                strengths: ["Good clarity", "On-topic reasoning"],
+                improvements: ["Include measurable results", "Cover one edge case"],
+                followUpQuestion: `Can you walk me through a concrete example related to ${jobTitle || "this role"}?`,
+                isComplete: (conversationHistory || []).length >= 4
+            }
+        }
+        throw err
+    }
 }
 
 
@@ -451,16 +474,33 @@ ${resumeText || "Not provided — analyze based on job description only and give
 
 Be specific, actionable, and honest. Focus on keyword matching, formatting compatibility, and content alignment.`
 
-    const response = await ai.models.generateContent({
-        model: MODEL,
-        contents: prompt,
-        config: {
-            responseMimeType: "application/json",
-            responseSchema: zodToJsonSchema(atsSchema),
-        }
-    })
+    try {
+        const response = await ai.models.generateContent({
+            model: MODEL,
+            contents: prompt,
+            config: {
+                responseMimeType: "application/json",
+                responseSchema: zodToJsonSchema(atsSchema),
+            }
+        })
 
-    return JSON.parse(response.text)
+        return JSON.parse(response.text)
+    } catch (err) {
+        if (isQuotaOrCreditError(err)) {
+            return {
+                overallScore: 74,
+                matchedKeywords: ["React", "Node.js", "REST"],
+                missingKeywords: ["TypeScript", "CI/CD"],
+                suggestions: [
+                    { section: "Summary", issue: "Too generic", fix: "Mention target role and 2-3 domain strengths." },
+                    { section: "Experience", issue: "Low impact metrics", fix: "Add quantified outcomes like latency reduction or conversion lift." },
+                    { section: "Skills", issue: "Missing JD keywords", fix: "Add exact skills from JD where honest and relevant." }
+                ],
+                summary: "Resume is reasonably aligned but missing a few high-signal keywords and measurable impact statements."
+            }
+        }
+        throw err
+    }
 }
 
 // ── Salary Negotiation Coach ───────────────────────────────────────────────────
@@ -489,12 +529,19 @@ ${history || "No prior conversation."}
 Candidate: ${userMessage}
 Coach:`
 
-    const response = await ai.models.generateContent({
-        model: MODEL,
-        contents: prompt
-    })
+    try {
+        const response = await ai.models.generateContent({
+            model: MODEL,
+            contents: prompt
+        })
 
-    return response.text?.trim() || "I'm here to help with your salary negotiation. What would you like to know?"
+        return response.text?.trim() || "I'm here to help with your salary negotiation. What would you like to know?"
+    } catch (err) {
+        if (isQuotaOrCreditError(err)) {
+            return `- **Market Range**:\n  - For ${role || "this role"}${company ? ` at ${company}` : ""}, estimate a realistic range using location and level data.\n- **Negotiation Script**:\n  - "Based on my experience and impact, I was targeting a package in the upper part of the range."\n- **Next Step**:\n  - Ask for base, bonus, equity, joining bonus, and review cycle details before deciding.`
+        }
+        throw err
+    }
 }
 
 module.exports = {

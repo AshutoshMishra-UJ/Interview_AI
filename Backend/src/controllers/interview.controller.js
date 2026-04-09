@@ -38,11 +38,19 @@ async function generateInterViewReportController(req, res) {
     try {
         let resumeContent = ""
         if (req.file) {
-            const rawText = await (new pdfParse.PDFParse(Uint8Array.from(req.file.buffer))).getText()
-            resumeContent = rawText
+            try {
+                const rawText = await (new pdfParse.PDFParse(Uint8Array.from(req.file.buffer))).getText()
+                resumeContent = rawText
+            } catch (parseErr) {
+                console.warn("Resume parsing failed, continuing without resume text:", parseErr.message)
+            }
         }
 
         const { selfDescription, jobDescription, companyPreset, aiMode } = req.body
+
+        if (!jobDescription || typeof jobDescription !== "string" || !jobDescription.trim()) {
+            return res.status(400).json({ message: "jobDescription is required." })
+        }
 
         const aiResult = await generateInterviewReport({
             resume: resumeContent,
@@ -52,14 +60,42 @@ async function generateInterViewReportController(req, res) {
             aiMode: aiMode || "live"
         })
 
-        const interviewReport = await interviewReportModel.create({
+        const baseReportPayload = {
             user: req.user.id,
             resume: resumeContent,
             selfDescription,
             jobDescription,
-            companyPreset: companyPreset || "default",
-            ...aiResult.interviewReport
-        })
+            companyPreset: companyPreset || "default"
+        }
+
+        let interviewReport
+        try {
+            interviewReport = await interviewReportModel.create({
+                ...baseReportPayload,
+                ...aiResult.interviewReport
+            })
+        } catch (createErr) {
+            // If the live model returns malformed JSON fields, retry persistence with deterministic mock output.
+            if (createErr?.name === "ValidationError" && aiResult.source === "live") {
+                const mockResult = await generateInterviewReport({
+                    resume: resumeContent,
+                    selfDescription,
+                    jobDescription,
+                    companyPreset: companyPreset || "default",
+                    aiMode: "mock"
+                })
+
+                interviewReport = await interviewReportModel.create({
+                    ...baseReportPayload,
+                    ...mockResult.interviewReport
+                })
+
+                aiResult.source = "mock"
+                aiResult.fallbackReason = "invalid_live_response"
+            } else {
+                throw createErr
+            }
+        }
 
         // ── Update Streak & XP ───────────────────────────────
         try {
@@ -162,7 +198,8 @@ async function gradeAnswerController(req, res) {
         res.status(200).json({ message: "Answer graded successfully.", grade, source: getAiSource() })
     } catch (err) {
         console.error("gradeAnswer Error:", err)
-        res.status(500).json({ message: err.message })
+        const normalized = normalizeControllerError(err, "Failed to grade answer.")
+        res.status(normalized.status).json({ message: normalized.message })
     }
 }
 
@@ -191,7 +228,8 @@ async function evaluateMockAnswerController(req, res) {
         res.status(200).json({ message: "Answer evaluated.", evaluation, source: getAiSource() })
     } catch (err) {
         console.error("evaluateMockAnswer Error:", err)
-        res.status(500).json({ message: err.message })
+        const normalized = normalizeControllerError(err, "Failed to evaluate mock answer.")
+        res.status(normalized.status).json({ message: normalized.message })
     }
 }
 
@@ -287,7 +325,8 @@ async function analyzeATSController(req, res) {
         res.status(200).json({ message: "ATS analysis complete.", ats: result, source: getAiSource() })
     } catch (err) {
         console.error("analyzeATS Error:", err)
-        res.status(500).json({ message: err.message })
+        const normalized = normalizeControllerError(err, "Failed to analyze ATS score.")
+        res.status(normalized.status).json({ message: normalized.message })
     }
 }
 
@@ -301,7 +340,8 @@ async function salaryCoachController(req, res) {
         res.status(200).json({ message: "Salary coach reply.", reply, source: getAiSource() })
     } catch (err) {
         console.error("salaryCoach Error:", err)
-        res.status(500).json({ message: err.message })
+        const normalized = normalizeControllerError(err, "Failed to generate salary coach response.")
+        res.status(normalized.status).json({ message: normalized.message })
     }
 }
 
