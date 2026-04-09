@@ -5,8 +5,20 @@ const upload = require("../middlewares/file.middleware")
 
 const interviewRouter = express.Router()
 
+function handleResumeUpload(req, res, next) {
+	upload.single("resume")(req, res, (err) => {
+		if (!err) return next()
+
+		if (err.code === "LIMIT_FILE_SIZE") {
+			return res.status(400).json({ message: "Resume file is too large. Max allowed size is 3MB." })
+		}
+
+		return res.status(400).json({ message: err.message || "Invalid resume upload." })
+	})
+}
+
 // ── Core ──────────────────────────────────────────────────────────────────────
-interviewRouter.post("/", authMiddleware.authUser, upload.single("resume"), interviewController.generateInterViewReportController)
+interviewRouter.post("/", authMiddleware.authUser, handleResumeUpload, interviewController.generateInterViewReportController)
 interviewRouter.get("/report/:interviewId", authMiddleware.authUser, interviewController.getInterviewReportByIdController)
 interviewRouter.get("/", authMiddleware.authUser, interviewController.getAllInterviewReportsController)
 interviewRouter.post("/resume/pdf/:interviewReportId", authMiddleware.authUser, interviewController.generateResumePdfController)
@@ -26,7 +38,7 @@ interviewRouter.get("/share/view/:token", interviewController.getSharedReportCon
 
 // ── Tier 1: ATS Score ─────────────────────────────────────────────────────────
 interviewRouter.post("/ats-score", authMiddleware.authUser, interviewController.analyzeATSController)
-interviewRouter.post("/resume/parse", authMiddleware.authUser, upload.single("resume"), interviewController.parseResumePdfController)
+interviewRouter.post("/resume/parse", authMiddleware.authUser, handleResumeUpload, interviewController.parseResumePdfController)
 
 // ── Tier 2: Salary Coach ──────────────────────────────────────────────────────
 interviewRouter.post("/salary-coach", authMiddleware.authUser, interviewController.salaryCoachController)
