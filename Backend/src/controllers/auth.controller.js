@@ -9,12 +9,11 @@ function isDatabaseConnected() {
 }
 
 function getAuthCookieOptions() {
-    const frontendOrigin = (process.env.CLIENT_URL || "").split(",")[0].trim()
-    const isCrossSiteDeployment = Boolean(frontendOrigin) && !/^http:\/\/localhost(:\d+)?$/.test(frontendOrigin)
+    const isProduction = process.env.NODE_ENV === 'production';
     return {
         httpOnly: true,
-        secure: isCrossSiteDeployment,
-        sameSite: isCrossSiteDeployment ? "none" : "lax",
+        secure: isProduction,
+        sameSite: isProduction ? "none" : "lax",
         path: "/",
         maxAge: 24 * 60 * 60 * 1000
     }
