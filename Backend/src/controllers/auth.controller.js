@@ -9,7 +9,7 @@ function isDatabaseConnected() {
 }
 
 function getAuthCookieOptions() {
-    const isProduction = process.env.NODE_ENV === 'production';
+    const isProduction = process.env.NODE_ENV === 'production' || process.env.RENDER === 'true' || Boolean(process.env.RENDER_SERVICE_ID);
     return {
         httpOnly: true,
         secure: isProduction,
