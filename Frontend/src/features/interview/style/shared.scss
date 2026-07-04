@@ -1,18 +1,21 @@
-$bg-page:      #0d1117;
-$bg-card:      #161b22;
-$bg-input:     #1e2535;
-$border:       #2a3348;
-$text-primary: #e6edf3;
-$text-muted:   #7d8590;
-$accent:       #ff2d78;
-$green:        #3fb950;
-$yellow:       #e3b341;
-$red:          #f85149;
-$font:         system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+$bg-page: #05060b;
+$bg-card: rgba(15, 23, 42, 0.58);
+$bg-input: rgba(8, 12, 24, 0.6);
+$border: rgba(148, 163, 184, 0.12);
+$text-primary: #f8fafc;
+$text-muted: rgba(226, 232, 240, 0.7);
+$accent: #8b5cf6;
+$green: #34d399;
+$yellow: #f59e0b;
+$red: #fb7185;
+$font: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
 .shared-page {
     min-height: 100vh;
-    background: $bg-page;
+    background:
+        radial-gradient(circle at top right, rgba(139, 92, 246, 0.12), transparent 28%),
+        radial-gradient(circle at 10% 12%, rgba(6, 182, 212, 0.08), transparent 22%),
+        linear-gradient(180deg, #05060b 0%, #080b14 55%, #05060b 100%);
     color: $text-primary;
     font-family: $font;
 }
@@ -25,7 +28,12 @@ $font:         system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
     border-bottom: 1px solid $border;
     background: $bg-card;
 
-    &__brand { font-weight: 700; font-size: 1rem; color: $accent; }
+    &__brand {
+        font-weight: 700;
+        font-size: 1rem;
+        color: $accent;
+    }
+
     &__badge {
         font-size: 0.75rem;
         padding: 0.25rem 0.6rem;
@@ -51,7 +59,11 @@ $font:         system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
     justify-content: space-between;
     gap: 1rem;
 
-    h1 { font-size: 1.75rem; font-weight: 700; margin: 0; }
+    h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin: 0;
+    }
 }
 
 .shared-score {
@@ -62,15 +74,38 @@ $font:         system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
     border-radius: 0.6rem;
     font-weight: 700;
 
-    &__val { font-size: 2rem; }
-    &__pct { font-size: 0.9rem; }
+    &__val {
+        font-size: 2rem;
+    }
 
-    &.score--high { background: rgba($green, 0.12); color: $green; border: 2px solid rgba($green, 0.3); }
-    &.score--mid  { background: rgba($yellow, 0.12); color: $yellow; border: 2px solid rgba($yellow, 0.3); }
-    &.score--low  { background: rgba($red, 0.12); color: $red; border: 2px solid rgba($red, 0.3); }
+    &__pct {
+        font-size: 0.9rem;
+    }
+
+    &.score--high {
+        background: rgba($green, 0.12);
+        color: $green;
+        border: 2px solid rgba($green, 0.3);
+    }
+
+    &.score--mid {
+        background: rgba($yellow, 0.12);
+        color: $yellow;
+        border: 2px solid rgba($yellow, 0.3);
+    }
+
+    &.score--low {
+        background: rgba($red, 0.12);
+        color: $red;
+        border: 2px solid rgba($red, 0.3);
+    }
 }
 
-.shared-sections { display: flex; flex-direction: column; gap: 1.5rem; }
+.shared-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
 
 .shared-section {
     background: $bg-card;
@@ -100,9 +135,23 @@ $font:         system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
     border-radius: 2rem;
     border: 1px solid;
 
-    &--high   { background: rgba($red, 0.12);    color: $red;    border-color: rgba($red, 0.3); }
-    &--medium { background: rgba($yellow, 0.12); color: $yellow; border-color: rgba($yellow, 0.3); }
-    &--low    { background: rgba($green, 0.12);  color: $green;  border-color: rgba($green, 0.3); }
+    &--high {
+        background: rgba($red, 0.12);
+        color: $red;
+        border-color: rgba($red, 0.3);
+    }
+
+    &--medium {
+        background: rgba($yellow, 0.12);
+        color: $yellow;
+        border-color: rgba($yellow, 0.3);
+    }
+
+    &--low {
+        background: rgba($green, 0.12);
+        color: $green;
+        border-color: rgba($green, 0.3);
+    }
 }
 
 .shared-qlist {
@@ -121,10 +170,18 @@ $font:         system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
     border-radius: 0.4rem;
     line-height: 1.5;
     color: $text-primary;
-    strong { color: $accent; margin-right: 0.25rem; }
+
+    strong {
+        color: $accent;
+        margin-right: 0.25rem;
+    }
 }
 
-.shared-roadmap { display: flex; flex-direction: column; gap: 0.75rem; }
+.shared-roadmap {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
 
 .shared-day {
     padding: 0.75rem;
@@ -136,7 +193,10 @@ $font:         system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
         align-items: center;
         gap: 0.6rem;
         margin-bottom: 0.5rem;
-        strong { font-size: 0.875rem; }
+
+        strong {
+            font-size: 0.875rem;
+        }
     }
 
     &__badge {
@@ -152,7 +212,13 @@ $font:         system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
     ul {
         margin: 0;
         padding-left: 1.25rem;
-        li { font-size: 0.82rem; color: $text-muted; margin-bottom: 0.2rem; line-height: 1.4; }
+
+        li {
+            font-size: 0.82rem;
+            color: $text-muted;
+            margin-bottom: 0.2rem;
+            line-height: 1.4;
+        }
     }
 }
 
@@ -162,7 +228,10 @@ $font:         system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
     border-top: 1px solid $border;
     font-size: 0.8rem;
     color: $text-muted;
-    strong { color: $accent; }
+
+    strong {
+        color: $accent;
+    }
 }
 
 .shared-error {
@@ -185,8 +254,62 @@ $font:         system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
         gap: 0.75rem;
         max-width: 400px;
 
-        span { font-size: 3rem; }
-        h2 { color: $text-primary; margin: 0; }
-        p { color: $text-muted; margin: 0; font-size: 0.9rem; }
+        span {
+            font-size: 3rem;
+        }
+
+        h2 {
+            color: $text-primary;
+            margin: 0;
+        }
+
+        p {
+            color: $text-muted;
+            margin: 0;
+            font-size: 0.9rem;
+        }
+    }
+}
+
+@media (max-width: 760px) {
+    .shared-header {
+        padding: 0.9rem 1rem;
+        gap: 0.75rem;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .shared-title-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .shared-body {
+        padding: 1rem;
+        gap: 1.25rem;
+    }
+
+    .shared-section {
+        padding: 1rem;
+    }
+
+    .shared-qitem,
+    .shared-day ul li {
+        font-size: 0.82rem;
+    }
+}
+
+@media (max-width: 520px) {
+    .shared-score {
+        padding: 0.5rem 0.8rem;
+
+        &__val {
+            font-size: 1.6rem;
+        }
+    }
+
+    .shared-header__badge {
+        width: 100%;
+        text-align: center;
     }
 }

@@ -1,16 +1,12 @@
-import React, { useState, useEffect } from 'react'
-import { useNavigate, Link } from 'react-router'
-import "../auth.form.scss"
+import React, { useEffect, useState } from 'react'
+import { Link, useNavigate } from 'react-router'
 import { useAuth } from '../hooks/useAuth'
+import "../auth.landing.scss"
 
 const Login = () => {
 
-    const { loading, handleLogin, user } = useAuth()
+    const { loading, handleLogin } = useAuth()
     const navigate = useNavigate()
-
-    useEffect(() => {
-        if (user) navigate('/')
-    }, [user, navigate])
 
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
@@ -21,52 +17,72 @@ const Login = () => {
         setError("")
         const res = await handleLogin({ email, password })
         if (res && res.success) {
-            navigate('/')
+            navigate('/app', { replace: true })
         } else {
             setError(res?.message || "Login failed")
         }
     }
 
     if (loading) {
-        return (<main className="auth-page"><h1>Loading.......</h1></main>)
+        return <main className="auth-page"><h1>Loading...</h1></main>
     }
 
     return (
-        <main className="auth-page">
+        <main className="auth-page auth-page--login">
             <div className="auth-shell">
-                <section className="auth-showcase" aria-hidden="true">
-                    <p className="auth-showcase__brand">InterviewAI</p>
-                    <h2>Interview prep that feels like a real coaching platform.</h2>
-                    <p className="auth-showcase__copy">Create targeted plans, track your score trend, and practice with structured feedback.</p>
+                <section className="auth-showcase">
+                    <Link to="/" className="auth-showcase__brand">Self-Interview AI</Link>
+                    <h2>Practice interviews inside a premium AI feedback loop.</h2>
+                    <p className="auth-showcase__copy">Refine your answers, rehearse with confidence, and see exactly where your delivery improves.</p>
                     <div className="auth-showcase__chips">
-                        <span>Role-specific plans</span>
-                        <span>ATS insights</span>
-                        <span>Mock interview flow</span>
+                        <span>Avatar-led interviews</span>
+                        <span>Instant analytics</span>
+                        <span>Private practice space</span>
+                    </div>
+                    <div className="auth-showcase__stats">
+                        <div><strong>92%</strong><span>feel more prepared</span></div>
+                        <div><strong>3x</strong><span>faster answer improvement</span></div>
                     </div>
                 </section>
 
-                <div className="form-container">
-                    <p className="auth-brand">InterviewAI</p>
-                    <h1>Login</h1>
-                    <p className="auth-subtitle">Welcome back. Continue your interview preparation journey.</p>
+                <section className="auth-form-card">
+                    <div className="auth-form-card__top">
+                        <span className="auth-form-card__eyebrow">Welcome back</span>
+                        <h1>Login</h1>
+                        <p>Continue your interview rehearsal and pick up exactly where you left off.</p>
+                    </div>
+
                     {error && <div className="error-message">{error}</div>}
+
                     <form onSubmit={handleSubmit}>
                         <div className="input-group">
                             <label htmlFor="email">Email</label>
                             <input
-                                onChange={(e) => { setEmail(e.target.value) }}
-                                type="email" id="email" name='email' placeholder='Enter email address' />
+                                onChange={(e) => setEmail(e.target.value)}
+                                value={email}
+                                type="email"
+                                id="email"
+                                name="email"
+                                placeholder="Enter email address"
+                            />
                         </div>
                         <div className="input-group">
                             <label htmlFor="password">Password</label>
                             <input
-                                onChange={(e) => { setPassword(e.target.value) }}
-                                type="password" id="password" name='password' placeholder='Enter password' />
+                                onChange={(e) => setPassword(e.target.value)}
+                                value={password}
+                                type="password"
+                                id="password"
+                                name="password"
+                                placeholder="Enter password"
+                            />
                         </div>
-                        <button className='button primary-button' >Login</button>
+
+                        <button className='button primary-button'>Login</button>
                     </form>
-                    <p className="auth-switch">Don't have an account? <Link to={"/register"} >Register</Link> </p>
-                </div>
+
+                    <p className="auth-switch">Don't have an account? <Link to="/register">Register</Link></p>
+                </section>
             </div>
         </main>
     )

@@ -6,15 +6,15 @@ const upload = require("../middlewares/file.middleware")
 const interviewRouter = express.Router()
 
 function handleResumeUpload(req, res, next) {
-	upload.single("resume")(req, res, (err) => {
-		if (!err) return next()
+    upload.single("resume")(req, res, (err) => {
+        if (!err) return next()
 
-		if (err.code === "LIMIT_FILE_SIZE") {
-			return res.status(400).json({ message: "Resume file is too large. Max allowed size is 3MB." })
-		}
+        if (err.code === "LIMIT_FILE_SIZE") {
+            return res.status(400).json({ message: "Resume file is too large. Max allowed size is 3MB." })
+        }
 
-		return res.status(400).json({ message: err.message || "Invalid resume upload." })
-	})
+        return res.status(400).json({ message: err.message || "Invalid resume upload." })
+    })
 }
 
 // ── Core ──────────────────────────────────────────────────────────────────────
@@ -24,7 +24,7 @@ interviewRouter.get("/", authMiddleware.authUser, interviewController.getAllInte
 interviewRouter.post("/resume/pdf/:interviewReportId", authMiddleware.authUser, interviewController.generateResumePdfController)
 
 // ── Answer Grader ─────────────────────────────────────────────────────────────
-interviewRouter.post("/grade-answer", authMiddleware.authUser, interviewController.gradeAnswerController)
+interviewRouter.post("/grade-answer", authMiddleware.authUserDbOptional, interviewController.gradeAnswerController)
 
 // ── Mock Interview ────────────────────────────────────────────────────────────
 interviewRouter.post("/mock/:interviewId/evaluate", authMiddleware.authUser, interviewController.evaluateMockAnswerController)
@@ -37,11 +37,11 @@ interviewRouter.post("/share/:interviewId", authMiddleware.authUser, interviewCo
 interviewRouter.get("/share/view/:token", interviewController.getSharedReportController)
 
 // ── Tier 1: ATS Score ─────────────────────────────────────────────────────────
-interviewRouter.post("/ats-score", authMiddleware.authUser, interviewController.analyzeATSController)
+interviewRouter.post("/ats-score", authMiddleware.authUserDbOptional, interviewController.analyzeATSController)
 interviewRouter.post("/resume/parse", authMiddleware.authUser, handleResumeUpload, interviewController.parseResumePdfController)
 
 // ── Tier 2: Salary Coach ──────────────────────────────────────────────────────
-interviewRouter.post("/salary-coach", authMiddleware.authUser, interviewController.salaryCoachController)
+interviewRouter.post("/salary-coach", authMiddleware.authUserDbOptional, interviewController.salaryCoachController)
 
 // ── Tier 2: Leaderboard (public) ──────────────────────────────────────────────
 interviewRouter.get("/leaderboard", interviewController.getLeaderboardController)

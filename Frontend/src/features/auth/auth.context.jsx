@@ -1,9 +1,8 @@
-import { createContext, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { getMe } from "./services/auth.api";
+import { AuthContext } from "./auth.context.store";
 
-export const AuthContext = createContext()
-
-export const AuthProvider = ({ children }) => { 
+export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null)
     const [loading, setLoading] = useState(true)
 
@@ -14,7 +13,7 @@ export const AuthProvider = ({ children }) => {
                 if (data && data.user) {
                     setUser(data.user)
                 }
-            } catch (err) {
+            } catch {
                 console.log("Not logged in");
             } finally {
                 setLoading(false)
@@ -24,7 +23,7 @@ export const AuthProvider = ({ children }) => {
     }, [])
 
     return (
-        <AuthContext.Provider value={{user, setUser, loading, setLoading}} >
+        <AuthContext.Provider value={{ user, setUser, loading, setLoading }} >
             {children}
         </AuthContext.Provider>
     )

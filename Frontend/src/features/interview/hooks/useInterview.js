@@ -1,6 +1,6 @@
 import { getAllInterviewReports, generateInterviewReport, getInterviewReportById, generateResumePdf } from "../services/interview.api"
-import { useContext, useEffect } from "react"
-import { InterviewContext } from "../interview.context"
+import { useCallback, useContext, useEffect } from "react"
+import { InterviewContext } from "../interview.context.store"
 import { useParams } from "react-router"
 
 
@@ -16,7 +16,19 @@ export const useInterview = () => {
     const { loading, setLoading, report, setReport, reports, setReports } = context
 
     const extractErrorMessage = (error, fallbackMessage) => {
-        return error?.response?.data?.message || error?.message || fallbackMessage
+        const status = error?.response?.status
+        const code = error?.response?.data?.code
+        const message = error?.response?.data?.message || error?.message
+
+        if (status === 503 && code === "DB_UNAVAILABLE") {
+            return "Database is temporarily unavailable, so report generation cannot be saved right now. Please retry in a minute."
+        }
+
+        if (status === 503) {
+            return "AI service is temporarily unavailable. Please retry in a minute or switch to Mock AI mode."
+        }
+
+        return message || fallbackMessage
     }
 
     const generateReport = async ({ jobDescription, selfDescription, resumeFile, companyPreset, aiMode }) => {
@@ -41,7 +53,7 @@ export const useInterview = () => {
         }
     }
 
-    const getReportById = async (interviewId) => {
+    const getReportById = useCallback(async (interviewId) => {
         setLoading(true)
         try {
             const response = await getInterviewReportById(interviewId)
@@ -56,9 +68,9 @@ export const useInterview = () => {
         } finally {
             setLoading(false)
         }
-    }
+    }, [setLoading, setReport])
 
-    const getReports = async () => {
+    const getReports = useCallback(async () => {
         setLoading(true)
         try {
             const response = await getAllInterviewReports()
@@ -71,7 +83,7 @@ export const useInterview = () => {
         } finally {
             setLoading(false)
         }
-    }
+    }, [setLoading, setReports])
 
     const getResumePdf = async (interviewReportId) => {
         setLoading(true)
@@ -99,7 +111,7 @@ export const useInterview = () => {
         } else {
             getReports()
         }
-    }, [interviewId])
+    }, [getReportById, getReports, interviewId])
 
     return { loading, report, reports, generateReport, getReportById, getReports, getResumePdf }
 

@@ -1,12 +1,12 @@
-$bg-card: rgba(18, 20, 31, 0.52);
-$border: rgba(255, 255, 255, 0.08);
-$text-primary: #f1f5f9;
-$text-muted: #9aa7b8;
-$accent: #6c72e6;
-$green: #3fb950;
-$yellow: #e3b341;
-$red: #f85149;
-$font: 'Inter', system-ui, sans-serif;
+$bg-card: rgba(15, 23, 42, 0.58);
+$border: rgba(148, 163, 184, 0.12);
+$text-primary: #f8fafc;
+$text-muted: rgba(226, 232, 240, 0.7);
+$accent: #8b5cf6;
+$green: #34d399;
+$yellow: #f59e0b;
+$red: #fb7185;
+$font: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
 
 .dashboard-page {
     min-height: 100vh;
@@ -19,6 +19,9 @@ $font: 'Inter', system-ui, sans-serif;
     display: flex;
     flex-direction: column;
     gap: 1.35rem;
+    background:
+        radial-gradient(circle at top right, rgba(139, 92, 246, 0.12), transparent 30%),
+        radial-gradient(circle at 10% 12%, rgba(6, 182, 212, 0.08), transparent 22%);
 }
 
 .dash-header {
@@ -313,5 +316,42 @@ $font: 'Inter', system-ui, sans-serif;
 
     .dash-stats {
         grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboard-page {
+        padding: 0.9rem 0.65rem 1.6rem;
+        gap: 1rem;
+    }
+
+    .dash-header {
+        h1 {
+            font-size: 1.45rem;
+        }
+
+        p {
+            font-size: 0.92rem;
+        }
+
+        &__actions {
+            flex-direction: column;
+
+            >* {
+                width: 100%;
+            }
+        }
+    }
+
+    .dash-new-btn,
+    .dash-logout-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .chart-card,
+    .stat-card,
+    .dash-report-card {
+        border-radius: 0.85rem;
     }
 }

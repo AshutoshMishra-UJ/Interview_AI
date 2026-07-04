@@ -25,8 +25,8 @@ const Leaderboard = () => {
     return (
         <div className='lb-page'>
             <header className='lb-header'>
-                <button className='lb-back' onClick={() => navigate('/')}>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6"/></svg>
+                <button className='lb-back' onClick={() => navigate('/app')}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6" /></svg>
                     Home
                 </button>
                 <div>
@@ -51,7 +51,7 @@ const Leaderboard = () => {
                             </div>
                             <div className='lb-podium__slot lb-podium__slot--1'>
                                 <div className='lb-podium__crown'>
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#e3b341"><path d="M2 20h20M5 20V9l7-5 7 5v11"/><path d="M9 20V14h6v6"/></svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#e3b341"><path d="M2 20h20M5 20V9l7-5 7 5v11" /><path d="M9 20V14h6v6" /></svg>
                                 </div>
                                 <div className='lb-podium__score'>{entries[0]?.score}%</div>
                                 <div className='lb-podium__name'>{entries[0]?.username}</div>

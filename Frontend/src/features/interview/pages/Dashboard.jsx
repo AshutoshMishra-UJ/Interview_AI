@@ -61,7 +61,7 @@ const Dashboard = () => {
 
     const onLogout = async () => {
         await handleLogout()
-        navigate('/login')
+        navigate('/login', { replace: true })
     }
 
     if (loading) return <main className='loading-screen'><h1>Loading analytics...</h1></main>
@@ -77,7 +77,7 @@ const Dashboard = () => {
                     <p>Track your interview preparation progress over time</p>
                 </div>
                 <div className='dash-header__actions'>
-                    <button className='dash-new-btn' onClick={() => navigate('/')}>
+                    <button className='dash-new-btn' onClick={() => navigate('/app')}>
                         + New Interview Plan
                     </button>
                     <button className='dash-logout-btn' onClick={onLogout}>

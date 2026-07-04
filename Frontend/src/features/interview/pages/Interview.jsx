@@ -669,12 +669,12 @@ const Interview = () => {
 
     const onLogout = async () => {
         await handleLogout()
-        navigate('/login')
+        navigate('/login', { replace: true })
     }
 
     useEffect(() => {
         if (interviewId) getReportById(interviewId)
-    }, [interviewId])
+    }, [getReportById, interviewId])
 
     // Load roadmap progress from report
     useEffect(() => {
@@ -685,6 +685,7 @@ const Interview = () => {
             } else if (typeof report.roadmapProgress === 'object') {
                 Object.assign(parsed, report.roadmapProgress)
             }
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setRoadmapProgress(parsed)
         }
     }, [report])
@@ -703,7 +704,17 @@ const Interview = () => {
     }, [interviewId])
 
     if (loading || !report) {
-        return <main className='loading-screen'><h1>Loading your interview plan...</h1></main>
+        return (
+            <main className='loading-screen'>
+                <div className='loading-screen__orb' aria-hidden='true' />
+                <div className='loading-screen__spinner' aria-hidden='true'>
+                    <span />
+                </div>
+                <p className='loading-screen__eyebrow'>Self-Interview AI</p>
+                <h1>Loading your interview plan</h1>
+                <p className='loading-screen__copy'>We’re pulling your generated strategy and preparing the report view.</p>
+            </main>
+        )
     }
 
     const scoreColor = report.matchScore >= 80 ? 'score--high' : report.matchScore >= 60 ? 'score--mid' : 'score--low'
@@ -887,7 +898,7 @@ const Interview = () => {
 
                     <div className='sidebar-divider' />
                     <div className='sidebar-links'>
-                        <button className='sidebar-link-btn' onClick={() => navigate('/')}>
+                        <button className='sidebar-link-btn' onClick={() => navigate('/app')}>
                             <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
                             Home
                         </button>

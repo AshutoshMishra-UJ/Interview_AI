@@ -9,11 +9,12 @@ function isDatabaseConnected() {
 }
 
 function getAuthCookieOptions() {
-    const isProduction = process.env.NODE_ENV === "production"
+    const frontendOrigin = (process.env.CLIENT_URL || "").split(",")[0].trim()
+    const isCrossSiteDeployment = Boolean(frontendOrigin) && !/^http:\/\/localhost(:\d+)?$/.test(frontendOrigin)
     return {
         httpOnly: true,
-        secure: isProduction,
-        sameSite: isProduction ? "none" : "lax",
+        secure: isCrossSiteDeployment,
+        sameSite: isCrossSiteDeployment ? "none" : "lax",
         path: "/",
         maxAge: 24 * 60 * 60 * 1000
     }
@@ -159,8 +160,8 @@ async function logoutUserController(req, res) {
 
     res.clearCookie("token", {
         path: "/",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-        secure: process.env.NODE_ENV === "production",
+        sameSite: getAuthCookieOptions().sameSite,
+        secure: getAuthCookieOptions().secure,
         httpOnly: true
     })
 

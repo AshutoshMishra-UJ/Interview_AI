@@ -12,6 +12,15 @@ function normalizeControllerError(err, fallbackMessage) {
         : (Number.isInteger(err?.response?.status) ? err.response.status : 500)
 
     let message = err?.message || err?.response?.data?.message || fallbackMessage
+    const errorText = String(err?.message || err?.name || "")
+
+    if (/Mongo|Mongoose|ECONNREFUSED|ENOTFOUND|timed out|topology|server selection/i.test(errorText)) {
+        return {
+            status: 503,
+            code: "DB_UNAVAILABLE",
+            message: "Database unavailable. Please try again shortly."
+        }
+    }
 
     if (typeof message === "string" && message.trim().startsWith("{")) {
         try {
@@ -157,7 +166,10 @@ async function generateInterViewReportController(req, res) {
     } catch (err) {
         console.error("generateInterViewReport Error:", err)
         const normalized = normalizeControllerError(err, "Failed to generate interview report.")
-        res.status(normalized.status).json({ message: normalized.message })
+        res.status(normalized.status).json({
+            message: normalized.message,
+            ...(normalized.code ? { code: normalized.code } : {})
+        })
     }
 }
 

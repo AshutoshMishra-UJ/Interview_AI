@@ -1,15 +1,13 @@
-import React, { useState, useEffect } from 'react'
-import { useNavigate, Link } from 'react-router'
+import React, { useEffect, useState } from 'react'
+import { Link, useNavigate } from 'react-router'
 import { useAuth } from '../hooks/useAuth'
+import "../auth.landing.scss"
 
 const Register = () => {
 
     const navigate = useNavigate()
-    const { loading, handleRegister, user } = useAuth()
+    const { loading, handleRegister } = useAuth()
 
-    useEffect(() => {
-        if (user) navigate('/')
-    }, [user, navigate])
 
     const [username, setUsername] = useState("")
     const [email, setEmail] = useState("")
@@ -21,34 +19,41 @@ const Register = () => {
         setError("")
         const res = await handleRegister({ username, email, password })
         if (res && res.success) {
-            navigate("/")
+            navigate("/app", { replace: true })
         } else {
             setError(res?.message || "Registration failed")
         }
     }
 
     if (loading) {
-        return (<main className="auth-page"><h1>Loading.......</h1></main>)
+        return <main className="auth-page"><h1>Loading...</h1></main>
     }
 
     return (
-        <main className="auth-page">
+        <main className="auth-page auth-page--register">
             <div className="auth-shell">
-                <section className="auth-showcase" aria-hidden="true">
-                    <p className="auth-showcase__brand">InterviewAI</p>
-                    <h2>Build interview confidence with structured AI guidance.</h2>
-                    <p className="auth-showcase__copy">From personalized plans to analytics, everything is designed to improve your outcomes.</p>
+                <section className="auth-showcase">
+                    <Link to="/" className="auth-showcase__brand">Self-Interview AI</Link>
+                    <h2>Build calm, repeatable interview confidence with AI coaching.</h2>
+                    <p className="auth-showcase__copy">Set your persona, generate a practice flow, and turn anxiety into measurable progress.</p>
                     <div className="auth-showcase__chips">
-                        <span>Progress dashboard</span>
-                        <span>Question practice</span>
-                        <span>Professional resume tools</span>
+                        <span>Guided onboarding</span>
+                        <span>Personalized prep</span>
+                        <span>Progress tracking</span>
+                    </div>
+                    <div className="auth-showcase__stats">
+                        <div><strong>Free</strong><span>No credit card required</span></div>
+                        <div><strong>24/7</strong><span>Practice on your schedule</span></div>
                     </div>
                 </section>
 
-                <div className="form-container">
-                    <p className="auth-brand">InterviewAI</p>
-                    <h1>Register</h1>
-                    <p className="auth-subtitle">Create your account and start building your interview strategy.</p>
+                <section className="auth-form-card">
+                    <div className="auth-form-card__top">
+                        <span className="auth-form-card__eyebrow">Create your account</span>
+                        <h1>Register</h1>
+                        <p>Start your first self-interview session in a few minutes.</p>
+                    </div>
+
                     {error && <div className="error-message">{error}</div>}
 
                     <form onSubmit={handleSubmit}>
@@ -56,28 +61,43 @@ const Register = () => {
                         <div className="input-group">
                             <label htmlFor="username">Username</label>
                             <input
-                                onChange={(e) => { setUsername(e.target.value) }}
-                                type="text" id="username" name='username' placeholder='Enter username' />
+                                onChange={(e) => setUsername(e.target.value)}
+                                value={username}
+                                type="text"
+                                id="username"
+                                name="username"
+                                placeholder="Enter username"
+                            />
                         </div>
                         <div className="input-group">
                             <label htmlFor="email">Email</label>
                             <input
-                                onChange={(e) => { setEmail(e.target.value) }}
-                                type="email" id="email" name='email' placeholder='Enter email address' />
+                                onChange={(e) => setEmail(e.target.value)}
+                                value={email}
+                                type="email"
+                                id="email"
+                                name="email"
+                                placeholder="Enter email address"
+                            />
                         </div>
                         <div className="input-group">
                             <label htmlFor="password">Password</label>
                             <input
-                                onChange={(e) => { setPassword(e.target.value) }}
-                                type="password" id="password" name='password' placeholder='Enter password' />
+                                onChange={(e) => setPassword(e.target.value)}
+                                value={password}
+                                type="password"
+                                id="password"
+                                name="password"
+                                placeholder="Enter password"
+                            />
                         </div>
 
-                        <button className='button primary-button' >Register</button>
+                        <button className='button primary-button'>Register</button>
 
                     </form>
 
-                    <p className="auth-switch">Already have an account? <Link to={"/login"} >Login</Link> </p>
-                </div>
+                    <p className="auth-switch">Already have an account? <Link to="/login">Login</Link></p>
+                </section>
             </div>
         </main>
     )

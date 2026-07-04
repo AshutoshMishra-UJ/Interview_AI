@@ -1,24 +1,27 @@
 // ── Variables (Mapped to Global Dark Fade) ────────────────────────────────────────────────────────────────
 $bg-page: transparent;
-$bg-card: rgba(18, 20, 31, 0.5);
-$bg-panel: rgba(22, 27, 45, 0.4);
-$bg-input: rgba(18, 20, 31, 0.3);
-$border-color: rgba(255, 255, 255, 0.06);
-$text-primary: #f1f5f9;
-$text-muted: #94a3b8;
-$accent: #6C72E6;
-$accent-alt: #9196f2;
-$badge-required: #6C72E6;
-$badge-best: #6C72E6;
-$info-bg: rgba(108, 114, 230, 0.1);
-$info-border: rgba(108, 114, 230, 0.3);
-$font-stack: 'Inter', system-ui, sans-serif;
+$bg-card: rgba(15, 23, 42, 0.58);
+$bg-panel: rgba(18, 24, 39, 0.5);
+$bg-input: rgba(8, 12, 24, 0.58);
+$border-color: rgba(148, 163, 184, 0.12);
+$text-primary: #f8fafc;
+$text-muted: rgba(226, 232, 240, 0.7);
+$accent: #8b5cf6;
+$accent-alt: #06b6d4;
+$badge-required: #8b5cf6;
+$badge-best: #06b6d4;
+$info-bg: rgba(139, 92, 246, 0.1);
+$info-border: rgba(139, 92, 246, 0.28);
+$font-stack: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
 
 // ── Page Shell ───────────────────────────────────────────────────────────────
 .home-page {
     width: 100%;
     min-height: 100vh;
-    background-color: $bg-page;
+    background:
+        radial-gradient(circle at top right, rgba(139, 92, 246, 0.12), transparent 28%),
+        radial-gradient(circle at 12% 18%, rgba(6, 182, 212, 0.08), transparent 20%),
+        linear-gradient(180deg, #05060b 0%, #080b14 52%, #05060b 100%);
     color: $text-primary;
     font-family: $font-stack;
 
@@ -58,12 +61,12 @@ $font-stack: 'Inter', system-ui, sans-serif;
 .interview-card {
     width: 100%;
     max-width: 900px;
-    background-color: var(--bg-card);
+    background-color: $bg-card;
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
     border: 1px solid var(--border-color);
     border-radius: 1rem;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 28px 70px rgba(0, 0, 0, 0.42);
     overflow: hidden;
 
     &__body {
@@ -415,8 +418,8 @@ $font-stack: 'Inter', system-ui, sans-serif;
     align-items: center;
     justify-content: space-between;
     padding: 0.75rem 2rem;
-    background: rgba($bg-card, 0.85);
-    backdrop-filter: blur(12px);
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.74), rgba(15, 23, 42, 0.52));
+    backdrop-filter: blur(16px);
     border-bottom: 1px solid $border-color;
     z-index: 100;
 
@@ -574,5 +577,130 @@ $font-stack: 'Inter', system-ui, sans-serif;
         font-weight: 600;
         color: $text-primary;
         min-width: 34px;
+    }
+}
+
+@media (max-width: 860px) {
+    .home-page {
+        padding-left: 0.9rem;
+        padding-right: 0.9rem;
+        padding-top: 5.4rem;
+    }
+
+    .home-topnav {
+        padding: 0.7rem 1rem;
+        flex-wrap: wrap;
+
+        &__actions {
+            width: 100%;
+            justify-content: flex-end;
+        }
+    }
+
+    .page-header h1 {
+        font-size: 1.85rem;
+    }
+
+    .company-selector,
+    .ai-toggle {
+        width: 100%;
+    }
+
+    .interview-card__body {
+        flex-direction: column;
+    }
+
+    .panel-divider {
+        width: 100%;
+        height: 1px;
+    }
+
+    .panel--left .char-counter {
+        bottom: 1.1rem;
+        right: 1.1rem;
+    }
+
+    .panel {
+        padding: 1.1rem;
+    }
+}
+
+@media (max-width: 560px) {
+    .home-page {
+        padding-left: 0.7rem;
+        padding-right: 0.7rem;
+        padding-top: 5rem;
+    }
+
+    .home-topnav {
+        gap: 0.65rem;
+
+        &__brand {
+            font-size: 0.92rem;
+        }
+
+        &__actions {
+            flex-direction: column;
+            align-items: stretch;
+
+            >* {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    }
+
+    .page-header {
+        h1 {
+            font-size: 1.55rem;
+        }
+
+        p {
+            font-size: 0.92rem;
+        }
+    }
+
+    .company-pills {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        width: 100%;
+    }
+
+    .company-pill,
+    .ai-toggle,
+    .generate-btn,
+    .home-topnav__dash,
+    .home-topnav__logout {
+        width: 100%;
+    }
+
+    .ai-toggle {
+        justify-content: space-between;
+    }
+
+    .interview-card {
+        border-radius: 0.9rem;
+    }
+
+    .interview-card__footer {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.8rem;
+
+        .footer-info {
+            text-align: center;
+        }
+    }
+
+    .generate-btn {
+        justify-content: center;
+    }
+
+    .panel__textarea {
+        font-size: 0.82rem;
+    }
+
+    .recent-reports .reports-list {
+        flex-direction: column;
     }
 }

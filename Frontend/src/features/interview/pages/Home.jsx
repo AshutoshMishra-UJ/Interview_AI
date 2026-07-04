@@ -135,13 +135,17 @@ const Home = () => {
     const [companyPreset, setCompanyPreset] = useState("default")
     const [useGeminiAi, setUseGeminiAi] = useState(true)
     const resumeInputRef = useRef()
-    const mockModeNotifiedRef = useRef(false)
 
     const navigate = useNavigate()
 
+    const shouldAutoFallbackToMock = (errorMessage) => {
+        const msg = String(errorMessage || "").toLowerCase()
+        return /gemini|quota|credit|resource_exhausted|api key|temporarily unavailable|rate limit|503|429/.test(msg)
+    }
+
     const onLogout = async () => {
         await handleLogout()
-        navigate('/login')
+        navigate('/login', { replace: true })
     }
 
     const handleGenerateReport = async () => {
@@ -157,12 +161,16 @@ const Home = () => {
             return
         }
 
+        const reportPayload = {
+            jobDescription,
+            selfDescription,
+            resumeFile,
+            companyPreset
+        }
+
         try {
             const data = await generateReport({
-                jobDescription,
-                selfDescription,
-                resumeFile,
-                companyPreset,
+                ...reportPayload,
                 aiMode: useGeminiAi ? "live" : "mock"
             })
             if (!data?._id) {
@@ -170,17 +178,30 @@ const Home = () => {
                 return
             }
 
-            if (data?.__source === "mock" && data?.__fallbackReason === "insufficient_credit") {
+            // When live mode falls back server-side, keep UI toggle in sync silently.
+            if (useGeminiAi && data?.__source === "mock") {
                 setUseGeminiAi(false)
-                alert("Gemini credits are insufficient. Switched to Mock AI mode automatically.")
-                mockModeNotifiedRef.current = true
-            } else if (data?.__source === "mock" && !mockModeNotifiedRef.current) {
-                alert("Mock AI mode is enabled. Results are simulated for functional testing.")
-                mockModeNotifiedRef.current = true
             }
 
             navigate(`/interview/${data._id}`)
         } catch (error) {
+            if (useGeminiAi && shouldAutoFallbackToMock(error?.message)) {
+                try {
+                    const fallbackData = await generateReport({
+                        ...reportPayload,
+                        aiMode: "mock"
+                    })
+
+                    if (fallbackData?._id) {
+                        setUseGeminiAi(false)
+                        navigate(`/interview/${fallbackData._id}`)
+                        return
+                    }
+                } catch {
+                    // Fall through to the standard error message only when fallback also fails.
+                }
+            }
+
             alert(error?.message || "Failed to generate report. Please try again in a moment.")
         }
     }
@@ -188,7 +209,13 @@ const Home = () => {
     if (loading) {
         return (
             <main className='loading-screen'>
-                <h1>Loading your interview plan...</h1>
+                <div className='loading-screen__orb' aria-hidden='true' />
+                <div className='loading-screen__spinner' aria-hidden='true'>
+                    <span />
+                </div>
+                <p className='loading-screen__eyebrow'>Self-Interview AI</p>
+                <h1>Generating your interview plan</h1>
+                <p className='loading-screen__copy'>We’re analyzing your role, resume, and company fit. This usually takes a few moments.</p>
             </main>
         )
     }
@@ -198,7 +225,7 @@ const Home = () => {
 
             {/* Top Nav */}
             <div className='home-topnav'>
-                <span className='home-topnav__brand'>⚡ InterviewAI</span>
+                <span className='home-topnav__brand'>⚡ Self-Interview AI</span>
                 <div className='home-topnav__actions'>
                     <button className='home-topnav__dash' onClick={() => navigate('/dashboard')}>
                         📊 Dashboard

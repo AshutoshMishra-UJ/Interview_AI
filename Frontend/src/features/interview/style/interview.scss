@@ -1,13 +1,13 @@
-// ── Shared Variables (Dynamic Dark Fade Theme) ────────────────────────────────
-$bg-page: transparent;
-$bg-card: rgba(18, 20, 31, 0.5);
-$bg-panel: rgba(22, 27, 45, 0.4);
-$bg-input: rgba(18, 20, 31, 0.3);
-$border-color: rgba(255, 255, 255, 0.06);
-$text-primary: #f1f5f9;
-$text-muted: #94a3b8;
-$accent: #6C72E6;
-$font-stack: 'Inter', system-ui, sans-serif;
+// ── Shared Variables (Landing Theme) ──────────────────────────────────────────
+$bg-page: #05060b;
+$bg-card: rgba(15, 23, 42, 0.58);
+$bg-panel: rgba(18, 24, 39, 0.5);
+$bg-input: rgba(8, 12, 24, 0.6);
+$border-color: rgba(148, 163, 184, 0.12);
+$text-primary: #f8fafc;
+$text-muted: rgba(226, 232, 240, 0.7);
+$accent: #8b5cf6;
+$font-stack: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
 
 // severity palette
 $severity-high: #ff4d4d;
@@ -22,7 +22,10 @@ $severity-low: #3fb950;
 .interview-page {
     width: 100%;
     min-height: 100vh;
-    background-color: $bg-page;
+    background:
+        radial-gradient(circle at top right, rgba(139, 92, 246, 0.12), transparent 28%),
+        radial-gradient(circle at 10% 12%, rgba(6, 182, 212, 0.08), transparent 22%),
+        linear-gradient(180deg, #05060b 0%, #080b14 55%, #05060b 100%);
     color: $text-primary;
     font-family: $font-stack;
     display: flex;
@@ -37,10 +40,11 @@ $severity-low: #3fb950;
     width: 100%;
     max-width: 1280px;
     margin: 0 auto;
-    background-color: $bg-card;
+    background-color: rgba(18, 20, 31, 0.5);
     border: 1px solid $border-color;
     border-radius: 1rem;
     justify-content: space-between;
+    box-shadow: 0 28px 70px rgba(0, 0, 0, 0.42);
 }
 
 .interview-divider {
@@ -2039,5 +2043,102 @@ $severity-low: #3fb950;
     &:hover {
         color: $text-primary;
         border-color: $text-muted;
+    }
+}
+
+@media (max-width: 960px) {
+    .interview-page {
+        padding: 0.9rem;
+    }
+
+    .interview-layout {
+        flex-direction: column;
+    }
+
+    .interview-divider {
+        width: 100%;
+        height: 1px;
+    }
+
+    .interview-nav,
+    .interview-sidebar {
+        width: 100%;
+    }
+
+    .interview-nav {
+        padding: 1rem;
+        gap: 1rem;
+    }
+
+    .nav-actions,
+    .sidebar-links {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.65rem;
+    }
+
+    .mock-interview-btn,
+    .share-btn,
+    .button.primary-button,
+    .sidebar-link-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .interview-content {
+        max-height: none;
+        padding: 1.1rem;
+    }
+
+    .interview-sidebar {
+        padding: 1rem;
+    }
+
+    .skill-gaps__list {
+        display: flex;
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 640px) {
+    .interview-page {
+        padding: 0.7rem;
+    }
+
+    .content-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.4rem;
+    }
+
+    .nav-actions,
+    .sidebar-links {
+        grid-template-columns: 1fr;
+    }
+
+    .roadmap-day {
+        padding-left: 2.5rem;
+
+        &::before {
+            left: 16px;
+        }
+    }
+
+    .roadmap-list::before {
+        left: 23px;
+    }
+
+    .interview-nav__item {
+        font-size: 0.82rem;
+        padding: 0.6rem 0.7rem;
+    }
+
+    .match-score__ring {
+        width: 78px;
+        height: 78px;
+    }
+
+    .match-score__value {
+        font-size: 1.35rem;
     }
 }

@@ -18,6 +18,14 @@ function isQuotaOrCreditError(err) {
     return status === 429 || /quota|credit|rate limit|resource_exhausted/i.test(message)
 }
 
+function isTransientAiError(err) {
+    const status = Number.isInteger(err?.status)
+        ? err.status
+        : (Number.isInteger(err?.response?.status) ? err.response.status : null)
+    const message = String(err?.message || err?.response?.data?.message || "")
+    return (status >= 500 && status < 600) || /service unavailable|deadline exceeded|timed? out|temporar/i.test(message)
+}
+
 // ── Company-specific interview context presets ────────────────────────────────
 const COMPANY_PRESETS = {
     google: "Google interviews focus heavily on data structures, algorithms (LeetCode hard), system design at massive scale, and Googliness (culture fit). Expect 4-5 coding rounds + system design.",
@@ -312,7 +320,7 @@ Grade the candidate's answer fairly and constructively. Be specific in feedback.
 
         return JSON.parse(response.text)
     } catch (err) {
-        if (isQuotaOrCreditError(err)) {
+        if (isQuotaOrCreditError(err) || isTransientAiError(err)) {
             return buildMockAnswerGrade()
         }
         throw err
@@ -359,7 +367,7 @@ Evaluate the answer and decide if the interview session should continue or wrap 
 
         return JSON.parse(response.text)
     } catch (err) {
-        if (isQuotaOrCreditError(err)) {
+        if (isQuotaOrCreditError(err) || isTransientAiError(err)) {
             return {
                 score: 7,
                 verdict: "good",
@@ -427,7 +435,7 @@ async function generateResumePdf({ resume, selfDescription, jobDescription }) {
         const pdfBuffer = await generatePdfFromHtml(jsonContent.html)
         return pdfBuffer
     } catch (err) {
-        if (isQuotaOrCreditError(err)) {
+        if (isQuotaOrCreditError(err) || isTransientAiError(err)) {
             const html = buildMockResumeHtml({ selfDescription, jobDescription })
             return await generatePdfFromHtml(html)
         }
@@ -486,7 +494,7 @@ Be specific, actionable, and honest. Focus on keyword matching, formatting compa
 
         return JSON.parse(response.text)
     } catch (err) {
-        if (isQuotaOrCreditError(err)) {
+        if (isQuotaOrCreditError(err) || isTransientAiError(err)) {
             return {
                 overallScore: 74,
                 matchedKeywords: ["React", "Node.js", "REST"],
@@ -537,7 +545,7 @@ Coach:`
 
         return response.text?.trim() || "I'm here to help with your salary negotiation. What would you like to know?"
     } catch (err) {
-        if (isQuotaOrCreditError(err)) {
+        if (isQuotaOrCreditError(err) || isTransientAiError(err)) {
             return `- **Market Range**:\n  - For ${role || "this role"}${company ? ` at ${company}` : ""}, estimate a realistic range using location and level data.\n- **Negotiation Script**:\n  - "Based on my experience and impact, I was targeting a package in the upper part of the range."\n- **Next Step**:\n  - Ask for base, bonus, equity, joining bonus, and review cycle details before deciding.`
         }
         throw err
